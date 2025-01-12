@@ -15,10 +15,10 @@ var task3_id = new mongoose.mongo.ObjectId('56cb91bdc3464f14678934cc');
 const userOne_id = mongoose.Types.ObjectId();
 const userOne = {
 	_id: userOne_id,
-	name: 'mejbah',
-	email: 'mushamim597@gmail.com',
-	password: 'mejbahmejbah',
-	confirmPassword: 'mejbahmejbah',
+	name: 'testuser1',
+	email: 'testuser1@example.com',
+	password: 'testpass123',
+	confirmPassword: 'testpass123',
 	account_status: 'ACTIVATED',
 	tokens: [
 		{
@@ -30,10 +30,10 @@ const userOne = {
 const usertwo_id = mongoose.Types.ObjectId();
 const usertwo = {
 	_id: usertwo_id,
-	name: 'shamim',
-	email: 'shamim597@gmail.com',
-	password: 'shamim456',
-	confirmPassword: 'shamim456',
+	name: 'testuser2',
+	email: 'testuser2@example.com',
+	password: 'testpass456',
+	confirmPassword: 'testpass456',
 	account_status: 'ACTIVATED',
 	tokens: [
 		{

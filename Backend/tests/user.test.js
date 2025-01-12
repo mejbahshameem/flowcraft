@@ -17,10 +17,10 @@ test('Should signup a new user', async () => {
 	await request(app)
 		.post('/users/create')
 		.send({
-			name: 'shammeemss',
-			email: 'shammeemss@gmail.com',
-			password: 'atakanatakan',
-			confirmPassword: 'atakanatakan',
+			name: 'newuser',
+			email: 'newuser@example.com',
+			password: 'securepass99',
+			confirmPassword: 'securepass99',
 		})
 		.expect(201);
 });
@@ -33,8 +33,8 @@ test('Should NOT signup a new user', async () => {
 		.send({
 			name: '',
 			email: '',
-			password: 'mejbahmejbah',
-			confirmPassword: 'mejbahmejbah',
+			password: 'testpass123',
+			confirmPassword: 'testpass123',
 		})
 		.expect(400);
 });
@@ -45,9 +45,9 @@ test('Should NOT signup a new user', async () => {
 		.post('/users/create')
 		.send({
 			name: 'riyadh',
-			email: 'riyadh@gmail.com',
-			password: 'mejbahmejbah',
-			confirmPassword: 'mejbahmejbahuddinshameem',
+			email: 'riyadh@example.com',
+			password: 'testpass123',
+			confirmPassword: 'completelyDifferentPassword',
 		})
 		.expect(400);
 	// console.log('Should NOT signup a new user confirm password mismatch....');
@@ -58,8 +58,8 @@ test('Should NOT login a user with invalid credentials', async () => {
 	const response = await request(app)
 		.post('/users/login')
 		.send({
-			email: 'invalidEMAIL@gmail.com',
-			password: 'mejbahmejbah',
+			email: 'invalid@example.com',
+			password: 'testpass123',
 		})
 		.expect(400);
 
@@ -75,8 +75,8 @@ test('Should activate a user', async () => {
 	const user = await request(app)
 		.post('/users/login')
 		.send({
-			email: 'mushamim597@gmail.com',
-			password: 'mejbahmejbah',
+			email: 'testuser1@example.com',
+			password: 'testpass123',
 		})
 		.expect(200);
 });

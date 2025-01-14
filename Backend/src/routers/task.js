@@ -4,7 +4,6 @@ const auth = require('../middleware/auth');
 const escapehtml = require('../middleware/escape-html');
 const Task = require('../models/task');
 const WorkFlow = require('../models/workflow');
-const fs = require('fs');
 //Create task for the workflow
 //workflow id is in req.body
 router.post('/workflow/tasks/create', auth, escapehtml, async (req, res) => {

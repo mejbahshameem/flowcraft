@@ -1,0 +1,90 @@
+<div class="auth-form">
+  @if (registered()) {
+    <div class="success-state">
+      <mat-icon class="success-icon">check_circle</mat-icon>
+      <h2>Account Created</h2>
+      <p>We sent an activation link to your email. Please check your inbox and click the link to activate your account.</p>
+      <a mat-flat-button routerLink="/login">Go to Login</a>
+    </div>
+  } @else {
+    <h2>Create Account</h2>
+    <p class="subtitle">Join FlowCraft and start building workflows</p>
+
+    <form [formGroup]="registerForm" (ngSubmit)="onSubmit()">
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Name</mat-label>
+        <input matInput formControlName="name" placeholder="Your full name" />
+        <mat-icon matSuffix>person</mat-icon>
+        @if (registerForm.get('name')?.hasError('required') && registerForm.get('name')?.touched) {
+          <mat-error>Name is required</mat-error>
+        }
+        @if (registerForm.get('name')?.hasError('minlength') && registerForm.get('name')?.touched) {
+          <mat-error>Name must be at least 2 characters</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Email</mat-label>
+        <input matInput type="email" formControlName="email" placeholder="you&#64;example.com" />
+        <mat-icon matSuffix>email</mat-icon>
+        @if (registerForm.get('email')?.hasError('required') && registerForm.get('email')?.touched) {
+          <mat-error>Email is required</mat-error>
+        }
+        @if (registerForm.get('email')?.hasError('email') && registerForm.get('email')?.touched) {
+          <mat-error>Enter a valid email address</mat-error>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Password</mat-label>
+        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="password" />
+        <button mat-icon-button matSuffix type="button" (click)="togglePassword()">
+          <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+        </button>
+        @if (registerForm.get('password')?.hasError('required') && registerForm.get('password')?.touched) {
+          <mat-error>Password is required</mat-error>
+        }
+        @if (registerForm.get('password')?.hasError('minlength') && registerForm.get('password')?.touched) {
+          <mat-error>Password must be at least 7 characters</mat-error>
+        }
+        @if (getPasswordStrength()) {
+          <mat-hint>
+            Strength: <strong>{{ getPasswordStrength() }}</strong>
+          </mat-hint>
+        }
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>Confirm Password</mat-label>
+        <input matInput [type]="hidePassword() ? 'password' : 'text'" formControlName="confirmPassword" />
+        @if (registerForm.get('confirmPassword')?.hasError('required') && registerForm.get('confirmPassword')?.touched) {
+          <mat-error>Please confirm your password</mat-error>
+        }
+        @if (registerForm.get('confirmPassword')?.hasError('passwordMismatch')) {
+          <mat-error>Passwords do not match</mat-error>
+        }
+      </mat-form-field>
+
+      <button
+        mat-flat-button
+        color="primary"
+        type="submit"
+        class="full-width submit-btn"
+        [disabled]="registerForm.invalid || loading()"
+      >
+        @if (loading()) {
+          <mat-spinner diameter="20"></mat-spinner>
+        } @else {
+          Create Account
+        }
+      </button>
+    </form>
+
+    <div class="auth-links">
+      <span>
+        Already have an account?
+        <a routerLink="/login">Sign In</a>
+      </span>
+    </div>
+  }
+</div>

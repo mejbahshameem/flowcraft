@@ -34,28 +34,26 @@ const scheduling = schedule.scheduleJob(
 						)
 						.asDays() >= 1
 				) {
-					TaskInstance.findOne({ _id: task._id })
-						.populate('owner')
-						.populate('workflow_instance')
-						.exec(async function(err, task_info) {
-							try {
-								var notify_obj = new TaskNotification({
-									follower_name: task_info.owner.name,
-									follower_email: task_info.owner.email,
-									task_name: task_info.name,
-									step_no: task_info.step_no,
-									end_time: moment(
-										task_info.timeFrame.timelog.end_time
-									),
-									workflow_name:
-										task_info.workflow_instance.name,
-									task_id: task_info._id,
-								});
-								await notify_obj.save();
-							} catch (error) {
-								throw new Error(error.message);
-							}
+					try {
+						const task_info = await TaskInstance.findOne({ _id: task._id })
+							.populate('owner')
+							.populate('workflow_instance');
+						var notify_obj = new TaskNotification({
+							follower_name: task_info.owner.name,
+							follower_email: task_info.owner.email,
+							task_name: task_info.name,
+							step_no: task_info.step_no,
+							end_time: moment(
+								task_info.timeFrame.timelog.end_time
+							),
+							workflow_name:
+								task_info.workflow_instance.name,
+							task_id: task_info._id,
 						});
+						await notify_obj.save();
+					} catch (error) {
+						throw new Error(error.message);
+					}
 				}
 			});
 		} catch (error) {

@@ -15,7 +15,7 @@
         var token = jsonAuth.token;
 
             const instance = axios.create({
-                baseURL: 'http://localhost',
+                baseURL: getHostUrl(),
                 timeout: 10000,
                 headers: {'Authorization': 'Bearer '+token}
               });

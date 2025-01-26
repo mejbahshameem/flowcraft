@@ -28,7 +28,7 @@ function init() {
 
 
 function getHostUrl(){ 
-  var hostUrl = "http://mejbah-oskm-se.herokuapp.com";
+  var hostUrl = "http://localhost:3000";
   return hostUrl;
 }
 

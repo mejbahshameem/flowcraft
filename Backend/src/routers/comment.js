@@ -7,7 +7,29 @@ const WorkFlowInstance = require('../models/workflowinstance');
 const User = require('../models/user');
 const Comment = require('../models/comment');
 const jwt = require('jsonwebtoken');
-const { commentType } = require('../utility/eunms');
+const { commentType } = require('../utility/enums');
+/**
+ * @swagger
+ * /comment/post:
+ *   post:
+ *     summary: Post a comment on a workflow
+ *     tags: [Comments]
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [description, workflow, comment_type]
+ *             properties:
+ *               description: { type: string }
+ *               workflow: { type: string }
+ *               comment_type: { type: string, enum: [public, private] }
+ *     responses:
+ *       201: { description: Comment posted }
+ *       400: { description: Invalid comment or workflow }
+ */
 //posting a comment in other workflows. Both Public and private comments supported. May have 1 and 2
 router.post('/comment/post', auth, escapehtml, async (req, res) => {
 	try {
@@ -41,8 +63,29 @@ router.post('/comment/post', auth, escapehtml, async (req, res) => {
 		res.status(500).send(error);
 	}
 });
-
-//get all the comments of a workflow.
+/**
+ * @swagger
+ * /workflow/{_id}/comments/{type}/all/{token}:
+ *   get:
+ *     summary: Get all comments for a workflow
+ *     tags: [Comments]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: type
+ *         required: true
+ *         schema: { type: string, enum: [public, private] }
+ *       - in: path
+ *         name: token
+ *         required: false
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: List of comments }
+ *       400: { description: Workflow not found or unauthorized }
+ *///get all the comments of a workflow.
 router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res) => {
 	const { _id, type, token } = req.params;
 

@@ -63,6 +63,22 @@ router.post('/workflow/tasks/create', auth, escapehtml, async (req, res) => {
 // 	}
 // });
 
+/**
+ * @swagger
+ * /workflow/{_id}/tasks/all:
+ *   get:
+ *     summary: Get all tasks for a workflow
+ *     tags: [Tasks]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Workflow info with tasks }
+ *       400: { description: Workflow not found }
+ */
 //get all tasks for a particular workflow
 router.get('/workflow/:_id/tasks/all', auth, async (req, res) => {
 	const { _id } = req.params;
@@ -103,6 +119,36 @@ router.get('/workflow/:_id/tasks/all', auth, async (req, res) => {
 // 	}
 // });
 
+/**
+ * @swagger
+ * /workflow/{wfid}/tasks/{tkid}:
+ *   patch:
+ *     summary: Edit an existing task
+ *     tags: [Tasks]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: wfid
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: tkid
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               name: { type: string }
+ *               description: { type: string }
+ *               days_required: { type: integer }
+ *               step_no: { type: integer }
+ *     responses:
+ *       200: { description: Task updated }
+ *       400: { description: Invalid updates or not found }
+ */
 //Edit an existing task
 //Editable field task name and description
 
@@ -151,6 +197,26 @@ router.patch(
 	}
 );
 
+/**
+ * @swagger
+ * /workflow/{wfid}/tasks/{tkid}:
+ *   delete:
+ *     summary: Delete a task from a workflow
+ *     tags: [Tasks]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: wfid
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: tkid
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Task deleted }
+ *       400: { description: Workflow not found }
+ */
 //delete a task in the workflow
 router.delete('/workflow/:wfid/tasks/:tkid', auth, async (req, res) => {
 	try {

@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { commentType } = require('../utility/eunms');
+const { commentType } = require('../utility/enums');
 
 const commentSchema = new mongoose.Schema(
 	{

@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { useraccountStatus } = require('../utility/eunms');
+const { useraccountStatus } = require('../utility/enums');
 const userSchema = new mongoose.Schema(
 	{
 		name: {
@@ -92,11 +92,12 @@ userSchema.methods.toJSON = function() {
 
 //Generating Account Activation/Deactivation Token (Instance)
 
-userSchema.methods.generateAcccountToken = async function() {
+userSchema.methods.generateAccountToken = async function() {
 	const user = this;
 	const token = jwt.sign(
 		{ _id: user._id.toString() },
-		process.env.JWT_SECRET
+		process.env.JWT_SECRET,
+		{ expiresIn: '24h' }
 	);
 
 	user.tokens = user.tokens.concat({ token });
@@ -111,7 +112,8 @@ userSchema.methods.generateAuthToken = async function() {
 	const user = this;
 	const token = jwt.sign(
 		{ _id: user._id.toString() },
-		process.env.JWT_SECRET
+		process.env.JWT_SECRET,
+		{ expiresIn: '7d' }
 	);
 
 	user.tokens = user.tokens.concat({ token });
@@ -149,7 +151,7 @@ userSchema.pre('save', async function(next) {
 	const user = this;
 
 	if (user.isModified('password')) {
-		user.password = await bcrypt.hash(user.password, 8);
+		user.password = await bcrypt.hash(user.password, 12);
 	}
 
 	next();

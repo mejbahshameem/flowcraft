@@ -37,7 +37,7 @@ A collaborative platform for creating, sharing, and executing step by step workf
 | Frontend | HTML5, JavaScript, jQuery, Bootstrap 4 |
 | Auth | JSON Web Tokens (JWT) with expiration, bcrypt (12 rounds) |
 | Security | Helmet, CORS, rate limiting, mongo sanitize |
-| Email | SendGrid |
+| Email | Resend |
 | Scheduling | node schedule (cron jobs for deadline reminders) |
 | Image Processing | Sharp |
 | API Docs | Swagger / OpenAPI 3.0 at `/api/docs` |
@@ -45,7 +45,7 @@ A collaborative platform for creating, sharing, and executing step by step workf
 
 ## Project Structure
 
-`
+```
 flowcraft/
 Backend/
     config/              # Environment configs (not tracked)
@@ -62,7 +62,7 @@ Frontend/
     tests/               # Frontend test suites
     *.html               # Page templates
 README.md
-`
+```
 
 ## Getting Started
 
@@ -70,58 +70,58 @@ README.md
 
 - **Node.js** >= 18.0.0
 - **MongoDB** (local instance or MongoDB Atlas)
-- **SendGrid** API key (for email features)
+- **Resend** API key (for email features)
 
 ### Backend Setup
 
 1. Navigate to the Backend directory:
-   `
+   ```
    cd Backend
-   `
+   ```
 
 2. Install dependencies:
-   `
+   ```
    npm install
-   `
+   ```
 
 3. Create environment files by copying the examples:
-   `
+   ```
    cp config/dev.env.example config/dev.env
    cp config/test.env.example config/test.env
-   `
+   ```
 
 4. Edit config/dev.env with your actual values:
-   `
+   ```
    PORT=3000
    MONGODB_URL=mongodb://127.0.0.1:27017/flowcraft-dev
    JWT_SECRET=<your_secret>
-   SendGrid_API_Key=<your_sendgrid_key>
+   Resend_API_Key=<your_resend_key>
    SENDER_EMAIL=<your_verified_sender>
    FRONTEND_URL=http://localhost:8080/
-   `
-   Use a different MONGODB_URL database name for 	est.env.
+   ```
+   Use a different MONGODB_URL database name for test.env.
 
 5. Start the development server:
-   `
+   ```
    npm run dev
-   `
+   ```
 
 ### Frontend Setup
 
 1. Install a static file server:
-   `
+   ```
    npm install http-server -g
-   `
+   ```
 
 2. Navigate to the Frontend directory:
-   `
+   ```
    cd Frontend
-   `
+   ```
 
 3. Start the server:
-   `
+   ```
    http-server
-   `
+   ```
 
 4. Open http://localhost:8080 in your browser.
 
@@ -130,18 +130,18 @@ README.md
 ### Running Tests
 
 **Backend tests** (73 automated test cases across 4 suites):
-`
+```
 cd Backend
 npm run test
-`
+```
 
-Make sure config/test.env is configured with a valid SendGrid API key and a separate test database URL.
+Make sure config/test.env is configured with a valid Resend API key and a separate test database URL.
 
 **Frontend tests:**
-`
+```
 cd Frontend
 npm test
-`
+```
 
 ## API Overview
 

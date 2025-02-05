@@ -24,7 +24,7 @@ export class ActivateAccountComponent implements OnInit {
   ) {}
 
   ngOnInit(): void {
-    const token = this.route.snapshot.queryParamMap.get('token');
+    const token = this.route.snapshot.paramMap.get('token');
     if (!token) {
       this.loading.set(false);
       this.errorMessage.set('Invalid activation link. No token provided.');

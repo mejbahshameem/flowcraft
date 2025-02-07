@@ -1,8 +1,8 @@
 export interface Comment {
   _id: string;
-  text: string;
-  access: 'public' | 'private';
+  description: string;
   workflow: string;
-  owner: string | { _id: string; name: string };
+  comment_type: 'public' | 'private';
+  commenter: { _id: string; name: string };
   createdAt?: string;
 }

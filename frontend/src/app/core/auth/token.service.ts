@@ -1,25 +1,39 @@
-import { Injectable } from '@angular/core';
+import { Injectable, signal } from '@angular/core';
 
 const TOKEN_KEY = 'flowcraft_token';
 
 @Injectable({ providedIn: 'root' })
 export class TokenService {
+  private tokenState = signal<string | null>(localStorage.getItem(TOKEN_KEY));
+
+  readonly tokenChange = this.tokenState.asReadonly();
+
   getToken(): string | null {
-    return localStorage.getItem(TOKEN_KEY);
+    return this.tokenState();
   }
 
   setToken(token: string): void {
     localStorage.setItem(TOKEN_KEY, token);
+    this.tokenState.set(token);
   }
 
   removeToken(): void {
     localStorage.removeItem(TOKEN_KEY);
+    this.tokenState.set(null);
   }
 
   isLoggedIn(): boolean {
     const token = this.getToken();
     if (!token) return false;
     return !this.isTokenExpired(token);
+  }
+
+  decodePayload(token: string): Record<string, unknown> | null {
+    try {
+      return JSON.parse(atob(token.split('.')[1]));
+    } catch {
+      return null;
+    }
   }
 
   private isTokenExpired(token: string): boolean {

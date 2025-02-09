@@ -1,0 +1,68 @@
+@if (loading()) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else if (workflow(); as wf) {
+  <div class="detail-page">
+    <header class="workflow-header">
+      <div class="header-top">
+        <h1>{{ wf.name }}</h1>
+        <div class="header-actions">
+          <button mat-stroked-button (click)="onFollow()" [disabled]="followLoading()">
+            <mat-icon>bookmark_add</mat-icon>
+            Follow
+          </button>
+          <button mat-stroked-button (click)="onCopy()">
+            <mat-icon>content_copy</mat-icon>
+            Copy
+          </button>
+        </div>
+      </div>
+      <p class="description">{{ wf.description }}</p>
+      <div class="meta-row">
+        <app-vote-buttons
+          [workflowId]="workflowId"
+          [upVotes]="wf.up_votes"
+          [downVotes]="wf.down_votes"
+        />
+        <div class="meta-item">
+          <mat-icon>group</mat-icon>
+          <span>{{ wf.followers }} follower{{ wf.followers !== 1 ? 's' : '' }}</span>
+        </div>
+      </div>
+    </header>
+
+    <mat-divider></mat-divider>
+
+    <section class="tasks-section">
+      <h2>Tasks ({{ wf.tasks.length }})</h2>
+      @if (wf.tasks.length === 0) {
+        <p class="no-tasks">No tasks have been added to this workflow yet.</p>
+      } @else {
+        <mat-accordion>
+          @for (task of wf.tasks; track task._id) {
+            <mat-expansion-panel>
+              <mat-expansion-panel-header>
+                <mat-panel-title>
+                  <span class="step-badge">{{ task.step_no }}</span>
+                  {{ task.name }}
+                </mat-panel-title>
+                <mat-panel-description>
+                  {{ task.days_required }} day{{ task.days_required !== 1 ? 's' : '' }}
+                </mat-panel-description>
+              </mat-expansion-panel-header>
+              <p>{{ task.description }}</p>
+            </mat-expansion-panel>
+          }
+        </mat-accordion>
+      }
+    </section>
+
+    <mat-divider></mat-divider>
+
+    <section class="comments-section">
+      <h2>Comments</h2>
+      <app-comment-section [workflowId]="workflowId" />
+    </section>
+  </div>
+}

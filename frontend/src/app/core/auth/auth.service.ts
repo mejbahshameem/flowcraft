@@ -13,7 +13,10 @@ export class AuthService {
   private currentUser = signal<User | null>(null);
 
   readonly user = this.currentUser.asReadonly();
-  readonly isAuthenticated = computed(() => this.tokenService.isLoggedIn());
+  readonly isAuthenticated = computed(() => {
+    this.tokenService.tokenChange();
+    return this.tokenService.isLoggedIn();
+  });
 
   constructor(
     private http: HttpClient,

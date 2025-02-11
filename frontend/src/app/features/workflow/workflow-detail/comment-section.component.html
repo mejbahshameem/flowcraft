@@ -1,0 +1,29 @@
+@if (isLoggedIn()) {
+  <div class="comment-form">
+    <mat-form-field appearance="outline" class="comment-input">
+      <mat-label>Write a comment</mat-label>
+      <textarea matInput [(ngModel)]="newComment" rows="2"
+                placeholder="Share your thoughts on this workflow..."></textarea>
+    </mat-form-field>
+    <button mat-flat-button (click)="onSubmit()"
+            [disabled]="submitting() || !newComment.trim()">
+      Post
+    </button>
+  </div>
+}
+
+<div class="comments-list">
+  @for (comment of comments(); track comment._id) {
+    <div class="comment-item">
+      <div class="comment-header">
+        <span class="commenter-name">{{ comment.commenter.name }}</span>
+        @if (comment.createdAt) {
+          <span class="comment-date">{{ comment.createdAt | date:'mediumDate' }}</span>
+        }
+      </div>
+      <p class="comment-text">{{ comment.description }}</p>
+    </div>
+  } @empty {
+    <p class="no-comments">No comments yet. Be the first to share your thoughts.</p>
+  }
+</div>

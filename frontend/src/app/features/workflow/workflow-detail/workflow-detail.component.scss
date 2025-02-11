@@ -1,0 +1,113 @@
+.loading-container {
+  display: flex;
+  justify-content: center;
+  padding: 80px 0;
+}
+
+.detail-page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 32px 24px;
+}
+
+.workflow-header {
+  margin-bottom: 32px;
+
+  .header-top {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    gap: 16px;
+
+    h1 {
+      font-size: 1.75rem;
+      font-weight: 700;
+      margin: 0;
+      line-height: 1.3;
+    }
+  }
+
+  .header-actions {
+    display: flex;
+    gap: 8px;
+    flex-shrink: 0;
+  }
+
+  .description {
+    font-size: 1rem;
+    color: var(--mat-sys-on-surface-variant);
+    line-height: 1.7;
+    margin: 12px 0 20px;
+  }
+
+  .meta-row {
+    display: flex;
+    align-items: center;
+    gap: 24px;
+    flex-wrap: wrap;
+  }
+
+  .meta-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.9rem;
+    color: var(--mat-sys-on-surface-variant);
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.tasks-section {
+  padding: 32px 0;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 20px;
+  }
+
+  .no-tasks {
+    color: var(--mat-sys-on-surface-variant);
+    font-style: italic;
+  }
+
+  .step-badge {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border-radius: 50%;
+    background: var(--mat-sys-primary);
+    color: var(--mat-sys-on-primary);
+    font-size: 0.75rem;
+    font-weight: 600;
+    margin-right: 12px;
+    flex-shrink: 0;
+  }
+}
+
+.comments-section {
+  padding: 32px 0;
+
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0 0 20px;
+  }
+}
+
+@media (max-width: 600px) {
+  .detail-page {
+    padding: 20px 16px;
+  }
+
+  .workflow-header .header-top {
+    flex-direction: column;
+  }
+}

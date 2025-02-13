@@ -1,0 +1,71 @@
+<div class="profile-container">
+  <mat-card class="avatar-card">
+    <mat-card-content>
+      <div class="avatar-section">
+        <div class="avatar-circle">
+          @if (avatarUrl()) {
+            <img [src]="avatarUrl()" alt="Avatar" />
+          } @else {
+            <mat-icon class="avatar-placeholder">account_circle</mat-icon>
+          }
+        </div>
+        <div class="avatar-info">
+          <h3>{{ userName() }}</h3>
+          <p>{{ userEmail() }}</p>
+          <input type="file" accept="image/png,image/jpeg" #fileInput hidden (change)="onAvatarSelected($event)" />
+          <button mat-stroked-button (click)="fileInput.click()" [disabled]="uploadingAvatar()">
+            @if (uploadingAvatar()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              Change Avatar
+            }
+          </button>
+        </div>
+      </div>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Profile Settings</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="profileForm" (ngSubmit)="saveProfile()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Display Name</mat-label>
+          <input matInput formControlName="name" />
+          @if (profileForm.controls.name.hasError('required')) {
+            <mat-error>Name is required</mat-error>
+          }
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="profileForm.invalid || saving()">
+          Save Name
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+
+  <mat-card class="settings-card">
+    <mat-card-header>
+      <mat-card-title>Change Password</mat-card-title>
+    </mat-card-header>
+    <mat-card-content>
+      <form [formGroup]="passwordForm" (ngSubmit)="changePassword()">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>New Password</mat-label>
+          <input matInput type="password" formControlName="password" />
+          @if (passwordForm.controls.password.hasError('minlength')) {
+            <mat-error>At least 7 characters</mat-error>
+          }
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Confirm Password</mat-label>
+          <input matInput type="password" formControlName="confirmPassword" />
+        </mat-form-field>
+        <button mat-flat-button type="submit" [disabled]="passwordForm.invalid || saving()">
+          Change Password
+        </button>
+      </form>
+    </mat-card-content>
+  </mat-card>
+</div>

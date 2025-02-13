@@ -1,0 +1,70 @@
+.profile-container {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+}
+
+.avatar-card mat-card-content {
+  padding: 16px;
+}
+
+.avatar-section {
+  display: flex;
+  align-items: center;
+  gap: 24px;
+}
+
+.avatar-circle {
+  width: 80px;
+  height: 80px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: var(--mat-sys-surface-variant);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+}
+
+.avatar-placeholder {
+  font-size: 72px;
+  width: 72px;
+  height: 72px;
+  color: var(--mat-sys-on-surface-variant);
+}
+
+.avatar-info {
+  h3 {
+    margin: 0 0 4px;
+    font-weight: 500;
+  }
+
+  p {
+    margin: 0 0 12px;
+    color: var(--mat-sys-on-surface-variant);
+    font-size: 14px;
+  }
+}
+
+.settings-card {
+  mat-card-content {
+    padding: 16px 16px 0;
+  }
+
+  form {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 8px;
+  }
+}
+
+.full-width {
+  width: 100%;
+}

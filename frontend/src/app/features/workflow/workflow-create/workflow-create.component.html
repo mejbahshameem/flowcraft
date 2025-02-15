@@ -1,0 +1,125 @@
+@if (loadingEdit()) {
+  <div class="loading-container">
+    <mat-spinner diameter="48"></mat-spinner>
+  </div>
+} @else {
+  <div class="create-page">
+    <h1>{{ isEditMode ? 'Edit Workflow' : 'Create Workflow' }}</h1>
+
+    <mat-stepper linear #stepper>
+      <mat-step [stepControl]="infoForm" label="Basic Information">
+        <form [formGroup]="infoForm">
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Workflow Name</mat-label>
+            <input matInput formControlName="name" placeholder="e.g. Study in Germany" />
+            @if (infoForm.controls.name.hasError('required')) {
+              <mat-error>Name is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Description</mat-label>
+            <textarea matInput formControlName="description" rows="4"
+                      placeholder="Describe what this workflow covers and who it helps..."></textarea>
+            @if (infoForm.controls.description.hasError('required')) {
+              <mat-error>Description is required</mat-error>
+            }
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Location</mat-label>
+            <input matInput formControlName="location" placeholder="e.g. Germany, Berlin" />
+          </mat-form-field>
+
+          <mat-form-field appearance="outline">
+            <mat-label>Visibility</mat-label>
+            <mat-select formControlName="access">
+              <mat-option value="public">Public</mat-option>
+              <mat-option value="private">Private</mat-option>
+            </mat-select>
+          </mat-form-field>
+
+          <div class="step-actions">
+            <button mat-flat-button matStepperNext [disabled]="infoForm.invalid">Next</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step label="Add Tasks">
+        <form [formGroup]="taskForm">
+          <div class="task-list" formArrayName="tasks">
+            @for (task of tasks.controls; track $index; let i = $index) {
+              <div class="task-row" [formGroupName]="i">
+                <div class="task-header">
+                  <span class="task-number">Step {{ i + 1 }}</span>
+                  <button mat-icon-button (click)="removeTask(i)" type="button">
+                    <mat-icon>delete_outline</mat-icon>
+                  </button>
+                </div>
+                <div class="task-fields">
+                  <mat-form-field appearance="outline" class="task-name">
+                    <mat-label>Task Name</mat-label>
+                    <input matInput formControlName="name" />
+                  </mat-form-field>
+                  <mat-form-field appearance="outline" class="task-days">
+                    <mat-label>Days</mat-label>
+                    <input matInput type="number" formControlName="days_required" min="1" />
+                  </mat-form-field>
+                </div>
+                <mat-form-field appearance="outline" class="full-width">
+                  <mat-label>Description</mat-label>
+                  <textarea matInput formControlName="description" rows="2"></textarea>
+                </mat-form-field>
+                <mat-divider></mat-divider>
+              </div>
+            }
+          </div>
+
+          <button mat-stroked-button (click)="addTask()" type="button" class="add-task-btn">
+            <mat-icon>add</mat-icon>
+            Add Task
+          </button>
+
+          <div class="step-actions">
+            <button mat-button matStepperPrevious>Back</button>
+            <button mat-flat-button matStepperNext>Review</button>
+          </div>
+        </form>
+      </mat-step>
+
+      <mat-step label="Review">
+        <div class="review-section">
+          <h3>{{ infoForm.value.name }}</h3>
+          <p class="review-desc">{{ infoForm.value.description }}</p>
+          <p class="review-meta">
+            <strong>Location:</strong> {{ infoForm.value.location }}
+            &nbsp;&middot;&nbsp;
+            <strong>Visibility:</strong> {{ infoForm.value.access }}
+          </p>
+
+          <h4>Tasks ({{ tasks.length }})</h4>
+          @for (task of tasks.controls; track $index; let i = $index) {
+            <div class="review-task">
+              <span class="step-num">{{ i + 1 }}.</span>
+              <span>{{ task.value.name }}</span>
+              <span class="task-days-label">{{ task.value.days_required }} day(s)</span>
+            </div>
+          } @empty {
+            <p class="no-tasks">No tasks added. You can add them later by editing this workflow.</p>
+          }
+        </div>
+
+        <div class="step-actions">
+          <button mat-button matStepperPrevious>Back</button>
+          <button mat-flat-button (click)="onPublish()" [disabled]="saving()">
+            @if (saving()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              {{ isEditMode ? 'Save Changes' : 'Publish Workflow' }}
+            }
+          </button>
+        </div>
+      </mat-step>
+    </mat-stepper>
+  </div>
+}

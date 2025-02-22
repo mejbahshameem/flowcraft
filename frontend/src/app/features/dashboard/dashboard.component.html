@@ -1,0 +1,26 @@
+<div class="dashboard-shell">
+  <nav mat-tab-nav-bar [tabPanel]="tabPanel" class="dashboard-tabs">
+    <a mat-tab-link routerLink="my-workflows" routerLinkActive #rla1="routerLinkActive" [active]="rla1.isActive">
+      <mat-icon>inventory_2</mat-icon>
+      My Workflows
+    </a>
+    <a mat-tab-link routerLink="saved" routerLinkActive #rla2="routerLinkActive" [active]="rla2.isActive">
+      <mat-icon>bookmark</mat-icon>
+      Saved
+    </a>
+    <a mat-tab-link routerLink="voting-history" routerLinkActive #rla3="routerLinkActive" [active]="rla3.isActive">
+      <mat-icon>how_to_vote</mat-icon>
+      Voting History
+    </a>
+    <a mat-tab-link routerLink="profile" routerLinkActive #rla4="routerLinkActive" [active]="rla4.isActive">
+      <mat-icon>person</mat-icon>
+      Profile
+    </a>
+  </nav>
+
+  <mat-tab-nav-panel #tabPanel>
+    <div class="tab-content">
+      <router-outlet></router-outlet>
+    </div>
+  </mat-tab-nav-panel>
+</div>

@@ -1,5 +1,5 @@
 {
-  "name": "oskpm",
+  "name": "flowcraft",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -14,11 +14,12 @@
   },
   "repository": {
     "type": "git",
-    "url": "https://gitlab.cs.uni-saarland.de/se/courses/se19/project19.git"
+    "url": "https://github.com/mejbahshameem/flowcraft.git"
   },
   "keywords": [
-    "opensource",
-    "knowledge"
+    "workflow",
+    "automation",
+    "collaboration"
   ],
   "author": "",
   "license": "ISC",

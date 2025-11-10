@@ -1,7 +1,7 @@
 {
-  "name": "os_knowledge_and_project_management",
+  "name": "flowcraft-frontend",
   "version": "0.1.0",
-  "description": "Frontend of the OS Knowledge and project management project",
+  "description": "Frontend for FlowCraft workflow collaboration platform",
   "scripts": {
     "test": "jest"
   },

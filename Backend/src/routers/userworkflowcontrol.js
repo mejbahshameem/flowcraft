@@ -76,30 +76,28 @@ router.get(
 //get all created workflows for a particular user
 router.get('/user/me/created-workflows/all', auth, async (req, res) => {
 	try {
-		await WorkFlow.find({
+		const workflows = await WorkFlow.find({
 			owner: req.user._id,
 			deleted: false,
 		})
-			.sort({ 'voting.up_votes': -1 })
-			.exec(function(error, workflows) {
-				if (error) return res.status(400).send(error);
-				if (!workflows) return res.status(404).send();
-				let workflow_reduced_stat = workflows.reduce(function(
-					acc,
-					workflow
-				) {
-					acc.push({
-						_id: workflow._id,
-						name: workflow.name,
-						up_votes: workflow.voting.up_vote.length,
-						down_votes: workflow.voting.down_vote.length,
-						followers: workflow.followers.length,
-					});
-					return acc;
-				},
-				[]);
-				res.status(200).send(workflow_reduced_stat);
+			.sort({ 'voting.up_votes': -1 });
+
+		if (!workflows) return res.status(404).send();
+		let workflow_reduced_stat = workflows.reduce(function(
+			acc,
+			workflow
+		) {
+			acc.push({
+				_id: workflow._id,
+				name: workflow.name,
+				up_votes: workflow.voting.up_vote.length,
+				down_votes: workflow.voting.down_vote.length,
+				followers: workflow.followers.length,
 			});
+			return acc;
+		},
+		[]);
+		res.status(200).send(workflow_reduced_stat);
 	} catch (error) {
 		res.status(500).send();
 	}

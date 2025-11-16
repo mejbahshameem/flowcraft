@@ -1,13 +1,13 @@
 {
   "name": "flowcraft-frontend",
-  "version": "0.1.0",
+  "version": "1.0.0",
   "description": "Frontend for FlowCraft workflow collaboration platform",
   "scripts": {
-    "test": "jest"
+    "test": "jest --verbose"
   },
-  "author": "SE Project 19 Team",
+  "author": "",
   "license": "ISC",
   "devDependencies": {
-    "jest": "^24.9.0"
+    "jest": "^29.7.0"
   }
 }

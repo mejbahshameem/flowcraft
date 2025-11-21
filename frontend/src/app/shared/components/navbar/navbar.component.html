@@ -1,0 +1,34 @@
+<mat-toolbar color="primary" class="navbar">
+  <a routerLink="/" class="brand">
+    <mat-icon>account_tree</mat-icon>
+    <span class="brand-text">FlowCraft</span>
+  </a>
+
+  <span class="spacer"></span>
+
+  @if (isLoggedIn()) {
+    <button mat-button routerLink="/dashboard" routerLinkActive="active">
+      <mat-icon>dashboard</mat-icon>
+      <span class="nav-label">Dashboard</span>
+    </button>
+    <button mat-icon-button [matMenuTriggerFor]="userMenu">
+      <mat-icon>account_circle</mat-icon>
+    </button>
+    <mat-menu #userMenu="matMenu">
+      @if (user(); as u) {
+        <div class="menu-header">{{ u.name }}</div>
+      }
+      <button mat-menu-item routerLink="/dashboard">
+        <mat-icon>person</mat-icon>
+        <span>Profile</span>
+      </button>
+      <button mat-menu-item (click)="onLogout()">
+        <mat-icon>logout</mat-icon>
+        <span>Logout</span>
+      </button>
+    </mat-menu>
+  } @else {
+    <button mat-button routerLink="/login" routerLinkActive="active">Login</button>
+    <button mat-flat-button routerLink="/register" routerLinkActive="active">Sign Up</button>
+  }
+</mat-toolbar>

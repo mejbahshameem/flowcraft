@@ -88,13 +88,13 @@ test('Should update profile for user', async () => {
 		//This is going to work if the service confirms that token is valid.
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
-			name: 'Shameem',
+			name: 'UpdatedName',
 		})
 		.expect(200);
 
 	//also checking in the db for change of name
 	const user = await User.findById(response.body[0]._id);
-	expect(user.name).toBe('Shameem');
+	expect(user.name).toBe('UpdatedName');
 });
 
 //7. should not update profile for unauthorized user
@@ -196,8 +196,8 @@ test('Should send reset password request', async () => {
 		.post('/user/account/forget/password')
 		.send({
 			email: `${userOne.email}`,
-			password: 'mejbahuddin',
-			confirmPassword: 'mejbahuddin',
+			password: 'newpassword1',
+			confirmPassword: 'newpassword1',
 		})
 		.expect(200);
 });
@@ -208,7 +208,7 @@ test('Should NOT accept reset password request if passowrd mismatch', async () =
 		.post('/user/account/forget/password')
 		.send({
 			email: `${userOne.email}`,
-			password: 'mejbahuddin',
+			password: 'newpassword1',
 			confirmPassword: 'does not match',
 		})
 		.expect(400);
@@ -228,8 +228,8 @@ test('Should set New Password', async () => {
 	await request(app)
 		.post('/users/login')
 		.send({
-			email: 'mushamim597@gmail.com',
-			password: 'mejbahmejbah',
+			email: 'testuser1@example.com',
+			password: 'testpass123',
 		})
 		.expect(400);
 
@@ -237,7 +237,7 @@ test('Should set New Password', async () => {
 	await request(app)
 		.post('/users/login')
 		.send({
-			email: 'mushamim597@gmail.com',
+			email: 'testuser1@example.com',
 			password: 'changingit',
 		})
 		.expect(200);

@@ -34,7 +34,7 @@ router.post('/workflow/:_id/copy', auth, async (req, res) => {
 		const wf = await WorkFlow.findById({ _id });
 
 		var copy_wf = new WorkFlow({
-			_id: mongoose.Types.ObjectId(),
+			_id: new mongoose.Types.ObjectId(),
 			name: wf.name,
 			description: wf.description,
 			location: wf.location,
@@ -51,7 +51,7 @@ router.post('/workflow/:_id/copy', auth, async (req, res) => {
 				}
 
 				let copy_task = new Task({
-					_id: mongoose.Types.ObjectId(),
+					_id: new mongoose.Types.ObjectId(),
 					name: task.name,
 					description: task.description,
 					step_no: task.step_no,
@@ -442,7 +442,7 @@ router.get('/search', escapehtml, async (req, res) => {
 	}
 
 	try {
-		WorkFlow.find(
+		const docs = await WorkFlow.find(
 			{
 				$text: {
 					$search: req.query.interest + ' ' + req.query.location,
@@ -456,10 +456,8 @@ router.get('/search', escapehtml, async (req, res) => {
 			.equals(0)
 			.sort({ score: { $meta: 'textScore' }, [sortBy]: -1 })
 			.limit(parseInt(req.query.limit))
-			.skip(parseInt(req.query.skip))
-			.exec(function(err, docs) {
-				res.status(200).send(docs);
-			});
+			.skip(parseInt(req.query.skip));
+		res.status(200).send(docs);
 	} catch (error) {
 		res.status(500).send();
 	}

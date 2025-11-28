@@ -1,33 +1,45 @@
 const express = require('express');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const cors = require('cors');
+const mongoSanitize = require('express-mongo-sanitize');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
+const errorHandler = require('./middleware/errorHandler');
 require('./db/mongoose');
 const userRouter = require('./routers/user');
 const workFlowRouter = require('./routers/workflow');
 const taskRouter = require('./routers/task');
 const commentRouter = require('./routers/comment');
 const userworkflowRouter = require('./routers/userworkflowcontrol');
+const healthRouter = require('./routers/health');
 require('./utility/cronjobs');
 
 const app = express();
 
-// app.get('/', (_, res) => res.json({ test: 'Working' }));
-app.use(function(req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header(
-		'Access-Control-Allow-Methods',
-		'GET, PUT, POST, DELETE, OPTIONS, PATCH'
-	);
-	res.header(
-		'Access-Control-Allow-Headers',
-		'Content-Type, Authorization, Content-Length, X-Requested-With'
-	);
-	next();
-});
+const allowedOrigins = process.env.CORS_ORIGIN
+	? process.env.CORS_ORIGIN.split(',')
+	: ['http://localhost:4200', 'http://localhost:8080'];
 
-app.use(express.json());
-app.use(userRouter);
-app.use(workFlowRouter);
-app.use(taskRouter);
-app.use(commentRouter);
-app.use(userworkflowRouter);
+app.use(helmet());
+app.use(cors({
+	origin: allowedOrigins,
+	methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	credentials: true,
+}));
+app.use(morgan('dev'));
+app.use(express.json({ limit: '10kb' }));
+app.use(mongoSanitize());
+
+app.use(healthRouter);
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
+app.use('/api/v1', userRouter);
+app.use('/api/v1', workFlowRouter);
+app.use('/api/v1', taskRouter);
+app.use('/api/v1', commentRouter);
+app.use('/api/v1', userworkflowRouter);
+
+app.use(errorHandler);
 
 module.exports = app;

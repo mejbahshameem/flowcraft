@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { workflowAccess } = require('../utility/eunms');
+const { workflowAccess } = require('../utility/enums');
 const workFlowSchema = new mongoose.Schema(
 	{
 		name: {

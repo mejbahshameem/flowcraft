@@ -1,0 +1,52 @@
+<section class="hero">
+  <div class="hero-content">
+    <h1>Streamline Your Workflows</h1>
+    <p class="hero-subtitle">
+      Create, share, and manage workflows with your team.
+      Organize tasks, track progress, and get things done faster.
+    </p>
+    <div class="hero-actions">
+      <a mat-flat-button color="primary" routerLink="/register" class="hero-btn">
+        Get Started Free
+      </a>
+      <a mat-stroked-button routerLink="/search" class="hero-btn">
+        <mat-icon>search</mat-icon>
+        Browse Workflows
+      </a>
+    </div>
+  </div>
+</section>
+
+<section class="popular-section">
+  <div class="section-header">
+    <h2>Popular Workflows</h2>
+    <a mat-button routerLink="/search" color="primary">
+      View All
+      <mat-icon>arrow_forward</mat-icon>
+    </a>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (error()) {
+    <app-empty-state
+      icon="cloud_off"
+      title="Unable to Load Workflows"
+      message="Something went wrong while fetching workflows. Please try again later."
+    />
+  } @else if (popularWorkflows().length === 0) {
+    <app-empty-state
+      icon="inventory_2"
+      title="No Workflows Yet"
+      message="Be the first to create a workflow and share it with the community."
+    />
+  } @else {
+    <div class="workflow-grid">
+      @for (workflow of popularWorkflows(); track workflow._id) {
+        <app-workflow-card [workflow]="workflow" />
+      }
+    </div>
+  }
+</section>

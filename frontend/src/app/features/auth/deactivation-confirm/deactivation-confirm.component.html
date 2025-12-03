@@ -1,0 +1,19 @@
+<div class="status-page">
+  @if (loading()) {
+    <mat-spinner diameter="48"></mat-spinner>
+    <p>Confirming account deactivation...</p>
+  } @else if (success()) {
+    <mat-icon class="status-icon success">verified</mat-icon>
+    <h2>Account Deactivated</h2>
+    <p>
+      Your account has been deactivated successfully. All your data will be
+      removed. We are sorry to see you go.
+    </p>
+    <a mat-flat-button routerLink="/login" color="primary">Return to Home</a>
+  } @else {
+    <mat-icon class="status-icon error">error</mat-icon>
+    <h2>Confirmation Failed</h2>
+    <p>{{ errorMessage() }}</p>
+    <a mat-flat-button routerLink="/login" color="primary">Back to Login</a>
+  }
+</div>

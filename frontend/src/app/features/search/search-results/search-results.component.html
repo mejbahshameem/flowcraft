@@ -1,0 +1,51 @@
+<div class="search-page">
+  <div class="search-bar">
+    <mat-form-field appearance="outline" class="search-input">
+      <mat-label>Search workflows</mat-label>
+      <input
+        matInput
+        [ngModel]="query()"
+        (ngModelChange)="query.set($event)"
+        (keyup.enter)="onSearch()"
+        placeholder="Search by name, description, or location..."
+      />
+      <mat-icon matPrefix>search</mat-icon>
+    </mat-form-field>
+    <button mat-flat-button color="primary" class="search-btn" (click)="onSearch()">
+      Search
+    </button>
+    <mat-form-field appearance="outline" class="sort-select">
+      <mat-label>Sort by</mat-label>
+      <mat-select [ngModel]="sortBy()" (ngModelChange)="onSortChange($event)">
+        <mat-option value="relevant">Most Relevant</mat-option>
+        <mat-option value="popular">Most Popular</mat-option>
+        <mat-option value="recent">Most Recent</mat-option>
+      </mat-select>
+    </mat-form-field>
+  </div>
+
+  @if (loading()) {
+    <div class="loading-container">
+      <mat-spinner diameter="40"></mat-spinner>
+    </div>
+  } @else if (searched() && results().length === 0) {
+    <app-empty-state
+      icon="search_off"
+      title="No Results Found"
+      message="We could not find any workflows matching your search. Try different keywords or browse popular workflows."
+    />
+  } @else if (results().length > 0) {
+    <p class="result-count">{{ results().length }} workflow(s) found</p>
+    <div class="results-grid">
+      @for (workflow of results(); track workflow._id) {
+        <app-workflow-card [workflow]="workflow" />
+      }
+    </div>
+  } @else {
+    <app-empty-state
+      icon="manage_search"
+      title="Search Workflows"
+      message="Enter a search term above to find workflows shared by the community."
+    />
+  }
+</div>

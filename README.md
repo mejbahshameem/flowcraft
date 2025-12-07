@@ -37,7 +37,7 @@ A collaborative platform for creating, sharing, and executing step by step workf
 | Frontend | Angular 20, Angular Material 3, TypeScript 5.9, SCSS |
 | Auth | JSON Web Tokens (JWT) with expiration, bcrypt (12 rounds) |
 | Security | Helmet, CORS, rate limiting, mongo sanitize |
-| Email | Resend |
+| Email | Nodemailer with Gmail SMTP |
 | Scheduling | node schedule (cron jobs for deadline reminders) |
 | Image Processing | Sharp |
 | API Docs | Swagger / OpenAPI 3.0 at `/api/docs` |
@@ -73,7 +73,7 @@ README.md
 
 - **Node.js** >= 18.0.0
 - **MongoDB** (local instance or MongoDB Atlas)
-- **Resend** API key (for email features)
+- **Gmail** account with App Password (for email features)
 
 ### Backend Setup
 
@@ -98,8 +98,8 @@ README.md
    PORT=3000
    MONGODB_URL=mongodb://127.0.0.1:27017/flowcraft-dev
    JWT_SECRET=<your_secret>
-   Resend_API_Key=<your_resend_key>
-   SENDER_EMAIL=<your_verified_sender>
+   GMAIL_USER=<your_gmail@gmail.com>
+   GMAIL_APP_PASSWORD=<your_gmail_app_password>
    FRONTEND_URL=http://localhost:4200/
    ```
    Use a different MONGODB_URL database name for test.env.
@@ -136,7 +136,7 @@ cd Backend
 npm run test
 ```
 
-Make sure config/test.env is configured with a valid Resend API key and a separate test database URL.
+Make sure config/test.env is configured with valid Gmail credentials and a separate test database URL.
 
 **Frontend tests:**
 ```

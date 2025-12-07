@@ -2,8 +2,8 @@ const requiredVars = [
 	'PORT',
 	'MONGODB_URL',
 	'JWT_SECRET',
-	'Resend_API_Key',
-	'SENDER_EMAIL',
+	'GMAIL_USER',
+	'GMAIL_APP_PASSWORD',
 	'FRONTEND_URL',
 ];
 

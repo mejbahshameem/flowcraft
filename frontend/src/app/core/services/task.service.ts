@@ -4,6 +4,7 @@ import { Observable } from 'rxjs';
 
 import { environment } from '../../../environments/environment';
 import { Task } from '../models/task.model';
+import { WorkflowWithTasks } from '../models/workflow.model';
 
 @Injectable({ providedIn: 'root' })
 export class TaskService {
@@ -11,19 +12,19 @@ export class TaskService {
 
   constructor(private http: HttpClient) {}
 
-  getTasks(workflowId: string): Observable<Task[]> {
-    return this.http.get<Task[]>(`${this.apiUrl}/workflow/${workflowId}/tasks/all`);
+  getWorkflowTasks(workflowId: string): Observable<WorkflowWithTasks> {
+    return this.http.get<WorkflowWithTasks>(`${this.apiUrl}/workflow/${workflowId}/tasks/all`);
   }
 
-  createTask(task: Partial<Task>): Observable<Task> {
+  create(task: Partial<Task>): Observable<Task> {
     return this.http.post<Task>(`${this.apiUrl}/workflow/tasks/create`, task);
   }
 
-  updateTask(workflowId: string, taskId: string, data: Partial<Task>): Observable<Task> {
+  update(workflowId: string, taskId: string, data: Partial<Task>): Observable<Task> {
     return this.http.patch<Task>(`${this.apiUrl}/workflow/${workflowId}/tasks/${taskId}`, data);
   }
 
-  deleteTask(workflowId: string, taskId: string): Observable<any> {
-    return this.http.delete(`${this.apiUrl}/workflow/${workflowId}/tasks/${taskId}`);
+  delete(workflowId: string, taskId: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/workflow/${workflowId}/tasks/${taskId}`);
   }
 }

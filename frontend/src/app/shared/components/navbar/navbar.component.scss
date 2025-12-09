@@ -4,6 +4,8 @@
   position: sticky;
   top: 0;
   z-index: 1000;
+  background: var(--mat-sys-surface);
+  border-bottom: 1px solid var(--mat-sys-outline-variant);
 }
 
 .brand {
@@ -11,12 +13,13 @@
   align-items: center;
   gap: 8px;
   text-decoration: none;
-  color: inherit;
+  color: var(--mat-sys-primary);
 }
 
 .brand-text {
   font-size: 1.25rem;
-  font-weight: 500;
+  font-weight: 600;
+  letter-spacing: -0.02em;
 }
 
 .spacer {

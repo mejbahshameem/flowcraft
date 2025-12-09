@@ -24,6 +24,20 @@ mat-card-content {
   margin-bottom: 12px;
 }
 
+.location {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 0.85rem;
+  color: var(--mat-sys-on-surface-variant);
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+}
+
 .vote-display {
   display: flex;
   align-items: center;

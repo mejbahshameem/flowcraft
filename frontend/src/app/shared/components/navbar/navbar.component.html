@@ -1,6 +1,6 @@
-<mat-toolbar color="primary" class="navbar">
+<mat-toolbar class="navbar">
   <a routerLink="/" class="brand">
-    <mat-icon>account_tree</mat-icon>
+    <mat-icon>hub</mat-icon>
     <span class="brand-text">FlowCraft</span>
   </a>
 
@@ -10,6 +10,10 @@
     <button mat-button routerLink="/dashboard" routerLinkActive="active">
       <mat-icon>dashboard</mat-icon>
       <span class="nav-label">Dashboard</span>
+    </button>
+    <button mat-button routerLink="/workflow/create" routerLinkActive="active">
+      <mat-icon>add_circle_outline</mat-icon>
+      <span class="nav-label">Create</span>
     </button>
     <button mat-icon-button [matMenuTriggerFor]="userMenu">
       <mat-icon>account_circle</mat-icon>

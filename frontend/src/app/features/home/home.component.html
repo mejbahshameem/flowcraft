@@ -1,19 +1,43 @@
 <section class="hero">
   <div class="hero-content">
-    <h1>Streamline Your Workflows</h1>
+    <h1>Discover workflows.<br/>Follow the path.</h1>
     <p class="hero-subtitle">
-      Create, share, and manage workflows with your team.
-      Organize tasks, track progress, and get things done faster.
+      Find step by step guides created by the community, follow workflows
+      that match your goals, and track your progress from start to finish.
     </p>
+    <div class="search-container">
+      <mat-form-field appearance="outline" class="hero-search">
+        <mat-icon matPrefix>search</mat-icon>
+        <input matInput placeholder="Search workflows, e.g. Study in Germany..."
+               [(ngModel)]="searchQuery"
+               (keyup.enter)="onHeroSearch()" />
+      </mat-form-field>
+      <button mat-flat-button class="search-btn" (click)="onHeroSearch()">Search</button>
+    </div>
     <div class="hero-actions">
-      <a mat-flat-button color="primary" routerLink="/register" class="hero-btn">
-        Get Started Free
-      </a>
-      <a mat-stroked-button routerLink="/search" class="hero-btn">
-        <mat-icon>search</mat-icon>
-        Browse Workflows
+      <a mat-stroked-button routerLink="/register" class="hero-link">
+        Create an account
       </a>
     </div>
+  </div>
+</section>
+
+<section class="features-strip">
+  <div class="feature-item">
+    <mat-icon>explore</mat-icon>
+    <span>Discover Workflows</span>
+  </div>
+  <div class="feature-item">
+    <mat-icon>bookmark_add</mat-icon>
+    <span>Follow and Track</span>
+  </div>
+  <div class="feature-item">
+    <mat-icon>trending_up</mat-icon>
+    <span>Community Voted</span>
+  </div>
+  <div class="feature-item">
+    <mat-icon>task_alt</mat-icon>
+    <span>Step by Step Progress</span>
   </div>
 </section>
 
@@ -44,7 +68,7 @@
     />
   } @else {
     <div class="workflow-grid">
-      @for (workflow of popularWorkflows(); track workflow._id) {
+      @for (workflow of popularWorkflows(); track workflow.workflow) {
         <app-workflow-card [workflow]="workflow" />
       }
     </div>

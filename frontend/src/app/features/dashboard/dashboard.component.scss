@@ -1,0 +1,23 @@
+.dashboard-shell {
+  max-width: 960px;
+  margin: 0 auto;
+  padding: 24px 16px;
+}
+
+.dashboard-tabs {
+  margin-bottom: 24px;
+
+  a {
+    gap: 6px;
+  }
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+  }
+}
+
+.tab-content {
+  min-height: 300px;
+}

@@ -1,0 +1,67 @@
+@if (loading()) {
+  <div class="spinner-container">
+    <mat-spinner diameter="40"></mat-spinner>
+  </div>
+} @else if (workflows().length === 0) {
+  <div class="empty-state">
+    <mat-icon>bookmark_border</mat-icon>
+    <p>You are not following any workflows yet.</p>
+  </div>
+} @else {
+  <mat-accordion multi>
+    @for (wf of workflows(); track wf.workflow_instance) {
+      <mat-expansion-panel (opened)="onPanelOpened(wf)">
+        <mat-expansion-panel-header>
+          <mat-panel-title>{{ wf.name }}</mat-panel-title>
+          <mat-panel-description>
+            {{ wf.percentage }}% complete &middot; {{ wf.tasks }} tasks
+          </mat-panel-description>
+        </mat-expansion-panel-header>
+
+        <mat-progress-bar mode="determinate" [value]="wf.percentage" class="progress-bar"></mat-progress-bar>
+
+        @if (wf.loadingTasks) {
+          <div class="spinner-container small">
+            <mat-spinner diameter="28"></mat-spinner>
+          </div>
+        } @else {
+          <div class="task-list">
+            @for (task of wf.tasks; track task._id) {
+              <div class="task-item" [class.completed]="task.status === 'COMPLETED'">
+                <div class="task-info">
+                  <mat-icon class="task-status-icon">
+                    {{ task.status === 'COMPLETED' ? 'check_circle' : task.status === 'IN_PROGRESS' ? 'play_circle' : 'radio_button_unchecked' }}
+                  </mat-icon>
+                  <div class="task-details">
+                    <span class="task-name">{{ task.name }}</span>
+                    <span class="task-meta">{{ task.days_required }} day(s)</span>
+                  </div>
+                </div>
+                <div class="task-actions">
+                  @if (task.status === 'NOT_STARTED') {
+                    <button mat-stroked-button (click)="startTask(wf, task)" class="compact-btn">
+                      Start
+                    </button>
+                  } @else if (task.status === 'IN_PROGRESS') {
+                    <button mat-flat-button (click)="endTask(wf, task)" class="compact-btn">
+                      Complete
+                    </button>
+                  }
+                  <mat-slide-toggle
+                    [checked]="task.notification"
+                    (change)="toggleNotification(wf, task, $event.checked)"
+                    matTooltip="Email reminders">
+                  </mat-slide-toggle>
+                </div>
+              </div>
+            }
+          </div>
+        }
+
+        <mat-action-row>
+          <button mat-button color="warn" (click)="unfollowWorkflow(wf)">Unfollow</button>
+        </mat-action-row>
+      </mat-expansion-panel>
+    }
+  </mat-accordion>
+}

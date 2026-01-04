@@ -532,41 +532,22 @@ router.get('/workflow/:_id/view', async (req, res) => {
 //popular workflow by the #of upvotes
 router.get('/workflows/popular', async (req, res) => {
 	try {
-		WorkFlow.aggregate(
-			[
-				{
-					$project: {
-						name: 1,
-						description: 1,
-						access: 1,
-						location: 1,
-						voting: 1,
-						tasks: 1,
-						owner: 1,
-						deleted: 1,
-						followers: 1,
-						length: { $size: '$voting.up_vote.voter' },
-					},
-				},
-				{ $sort: { length: -1 } },
-				{ $limit: 10 },
-			],
-			function(err, results) {
-				newArr = [];
-				results.forEach(element => {
-					if (!element.deleted) {
-						newArr.push({
-							workflow: element._id,
-							name: element.name,
-							upvotes: element.voting.up_vote.length,
-						});
-					}
-				});
-				res.status(200).send(newArr);
-			}
+		const workflows = await WorkFlow.find({ deleted: false }).select(
+			'_id name voting'
 		);
+
+		const popular = workflows
+			.map(workflow => ({
+				workflow: workflow._id,
+				name: workflow.name,
+				upvotes: workflow.voting?.up_vote?.length || 0,
+			}))
+			.sort((a, b) => b.upvotes - a.upvotes)
+			.slice(0, 10);
+
+		res.status(200).send(popular);
 	} catch (error) {
-		res.status(500).send();
+		res.status(500).send(error);
 	}
 });
 

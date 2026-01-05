@@ -2,6 +2,7 @@ const express = require('express');
 const router = new express.Router();
 const auth = require('../middleware/auth');
 const escapehtml = require('../middleware/escape-html');
+const { authLimiter } = require('../middleware/rateLimiter');
 const User = require('../models/user');
 const multer = require('multer');
 const sharp = require('sharp');
@@ -15,7 +16,7 @@ const {
 } = require('../utility/emailService');
 
 //Create a new user
-router.post('/users/create', escapehtml, async (req, res) => {
+router.post('/users/create', authLimiter, escapehtml, async (req, res) => {
 	try {
 		const user = new User(req.body);
 		const isMatchPassword = req.body.password === req.body.confirmPassword;
@@ -109,7 +110,7 @@ router.post('/deactivate/:token', async (req, res) => {
 });
 
 //Password reset request
-router.post('/user/account/forget/password', escapehtml, async (req, res) => {
+router.post('/user/account/forget/password', authLimiter, escapehtml, async (req, res) => {
 	try {
 		const user = await User.findOne({
 			email: req.body.email,
@@ -194,7 +195,7 @@ router.get('/match/:token1/:token2', async (req, res) => {
 });
 
 //user login
-router.post('/users/login', escapehtml, async (req, res) => {
+router.post('/users/login', authLimiter, escapehtml, async (req, res) => {
 	try {
 		const user = await User.findbyCredentials(
 			req.body.email,

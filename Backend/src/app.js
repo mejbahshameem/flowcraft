@@ -1,29 +1,35 @@
 const express = require('express');
+const helmet = require('helmet');
+const morgan = require('morgan');
+const cors = require('cors');
+const mongoSanitize = require('express-mongo-sanitize');
 require('./db/mongoose');
 const userRouter = require('./routers/user');
 const workFlowRouter = require('./routers/workflow');
 const taskRouter = require('./routers/task');
 const commentRouter = require('./routers/comment');
 const userworkflowRouter = require('./routers/userworkflowcontrol');
+const healthRouter = require('./routers/health');
 require('./utility/cronjobs');
 
 const app = express();
 
-// app.get('/', (_, res) => res.json({ test: 'Working' }));
-app.use(function(req, res, next) {
-	res.header('Access-Control-Allow-Origin', '*');
-	res.header(
-		'Access-Control-Allow-Methods',
-		'GET, PUT, POST, DELETE, OPTIONS, PATCH'
-	);
-	res.header(
-		'Access-Control-Allow-Headers',
-		'Content-Type, Authorization, Content-Length, X-Requested-With'
-	);
-	next();
-});
+const allowedOrigins = process.env.CORS_ORIGIN
+	? process.env.CORS_ORIGIN.split(',')
+	: ['http://localhost:4200', 'http://localhost:8080'];
 
-app.use(express.json());
+app.use(helmet());
+app.use(cors({
+	origin: allowedOrigins,
+	methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],
+	allowedHeaders: ['Content-Type', 'Authorization'],
+	credentials: true,
+}));
+app.use(morgan('dev'));
+app.use(express.json({ limit: '10kb' }));
+app.use(mongoSanitize());
+
+app.use(healthRouter);
 app.use(userRouter);
 app.use(workFlowRouter);
 app.use(taskRouter);

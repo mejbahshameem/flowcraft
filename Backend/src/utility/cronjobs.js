@@ -2,7 +2,7 @@ const moment = require('moment');
 const TaskInstance = require('../models/taskinstance');
 const schedule = require('node-schedule');
 const TaskNotification = require('../models/tasknotification');
-const { taskStatus } = require('../utility/eunms');
+const { taskStatus } = require('../utility/enums');
 const { sendDeadlineNotification } = require('../utility/emailService');
 
 //cron job time setting it to 6pm/18:00. Run cron job 6 hours before start sending emails to minimize latency.

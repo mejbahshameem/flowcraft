@@ -1,6 +1,6 @@
 const mongoose = require('mongoose');
 const validator = require('validator');
-const { taskStatus } = require('../utility/eunms');
+const { taskStatus } = require('../utility/enums');
 
 const taskinstanceSchema = new mongoose.Schema(
 	{

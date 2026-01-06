@@ -7,7 +7,7 @@ const WorkFlowInstance = require('../models/workflowinstance');
 const User = require('../models/user');
 const Comment = require('../models/comment');
 const jwt = require('jsonwebtoken');
-const { commentType } = require('../utility/eunms');
+const { commentType } = require('../utility/enums');
 //posting a comment in other workflows. Both Public and private comments supported. May have 1 and 2
 router.post('/comment/post', auth, escapehtml, async (req, res) => {
 	try {

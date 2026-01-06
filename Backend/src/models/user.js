@@ -2,7 +2,7 @@ const mongoose = require('mongoose');
 const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const { useraccountStatus } = require('../utility/eunms');
+const { useraccountStatus } = require('../utility/enums');
 const userSchema = new mongoose.Schema(
 	{
 		name: {
@@ -92,7 +92,7 @@ userSchema.methods.toJSON = function() {
 
 //Generating Account Activation/Deactivation Token (Instance)
 
-userSchema.methods.generateAcccountToken = async function() {
+userSchema.methods.generateAccountToken = async function() {
 	const user = this;
 	const token = jwt.sign(
 		{ _id: user._id.toString() },

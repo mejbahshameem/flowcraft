@@ -8,11 +8,11 @@ const multer = require('multer');
 const sharp = require('sharp');
 const jwt = require('jsonwebtoken');
 const bcrypt = require('bcrypt');
-const { useraccountStatus } = require('../utility/eunms');
+const { useraccountStatus } = require('../utility/enums');
 const {
 	sendActivationToken,
 	sendDeactivationToken,
-	sendresetPassword,
+	sendResetPassword,
 } = require('../utility/emailService');
 
 //Create a new user
@@ -25,7 +25,7 @@ router.post('/users/create', authLimiter, escapehtml, async (req, res) => {
 		}
 
 		await user.save();
-		const activationToken = await user.generateAcccountToken();
+		const activationToken = await user.generateAccountToken();
 		sendActivationToken(user.name, user.email, activationToken);
 		// const token = await user.generateAuthToken();
 
@@ -76,7 +76,7 @@ router.post('/users/deactivate/:token', auth, async (req, res) => {
 			return res.status(400).send();
 		}
 
-		const deactivationToken = await user.generateAcccountToken();
+		const deactivationToken = await user.generateAccountToken();
 		sendDeactivationToken(user.name, user.email, deactivationToken);
 
 		res.status(200).send({ sucess: true });
@@ -125,8 +125,8 @@ router.post('/user/account/forget/password', authLimiter, escapehtml, async (req
 			throw new Error('password does not match');
 		}
 
-		const resetpasswordToken = await user.generateAcccountToken();
-		sendresetPassword(
+		const resetpasswordToken = await user.generateAccountToken();
+		sendResetPassword(
 			user.name,
 			user.email,
 			resetpasswordToken,

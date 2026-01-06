@@ -11,7 +11,7 @@ const {
 	task3,
 	setupDatabase,
 } = require('./fixtures/db');
-const { vote } = require('../src/utility/eunms');
+const { vote } = require('../src/utility/enums');
 
 beforeEach(setupDatabase);
 

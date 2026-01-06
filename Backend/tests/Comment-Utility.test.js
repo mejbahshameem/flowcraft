@@ -8,7 +8,7 @@ const TaskInstance = require('../src/models/taskinstance');
 const TaskNotification = require('../src/models/tasknotification');
 const WorkFlow = require('../src/models/workflow');
 const Comment = require('../src/models/comment');
-const { vote, taskStatus } = require('../src/utility/eunms');
+const { vote, taskStatus } = require('../src/utility/enums');
 const {
 	userOne_id,
 	usertwo_id,

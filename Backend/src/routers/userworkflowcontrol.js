@@ -5,7 +5,7 @@ const User = require('../models/user');
 const WorkFlow = require('../models/workflow');
 const WorkFlowInstance = require('../models/workflowinstance');
 const TaskInstance = require('../models/taskinstance');
-const { taskStatus } = require('../utility/eunms');
+const { taskStatus } = require('../utility/enums');
 const moment = require('moment');
 const TaskNotification = require('../models/tasknotification');
 

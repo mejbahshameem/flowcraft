@@ -9,8 +9,8 @@ const jwt = require('jsonwebtoken');
 const WorkFlowInstance = require('../models/workflowinstance');
 const TaskInstance = require('../models/taskinstance');
 const Task = require('../models/task');
-const { vote } = require('../utility/eunms');
-const { workflowAccess } = require('../utility/eunms');
+const { vote } = require('../utility/enums');
+const { workflowAccess } = require('../utility/enums');
 
 //Create a workflow
 router.post('/workflow/create', auth, escapehtml, async (req, res) => {

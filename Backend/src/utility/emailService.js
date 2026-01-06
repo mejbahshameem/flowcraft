@@ -29,7 +29,7 @@ const sendDeactivationToken = (name, email, token) => {
 	});
 };
 
-const sendresetPassword = (name, email, resetpasswordToken, newPassword) => {
+const sendResetPassword = (name, email, resetpasswordToken, newPassword) => {
 	sgMail.send({
 		from: senderEmail,
 		to: email,
@@ -62,5 +62,5 @@ module.exports = {
 	sendActivationToken,
 	sendDeactivationToken,
 	sendDeadlineNotification,
-	sendresetPassword,
+	sendResetPassword,
 };

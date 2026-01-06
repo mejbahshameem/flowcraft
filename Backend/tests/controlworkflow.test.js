@@ -5,7 +5,7 @@ const mongoose = require('mongoose');
 const WorkFlowInstance = require('../src/models/workflowinstance');
 const TaskInstance = require('../src/models/taskinstance');
 const WorkFlow = require('../src/models/workflow');
-const { vote, taskStatus } = require('../src/utility/eunms');
+const { vote, taskStatus } = require('../src/utility/enums');
 const {
 	userOne_id,
 	usertwo_id,

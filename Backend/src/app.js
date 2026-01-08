@@ -3,6 +3,7 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
+const errorHandler = require('./middleware/errorHandler');
 require('./db/mongoose');
 const userRouter = require('./routers/user');
 const workFlowRouter = require('./routers/workflow');
@@ -35,5 +36,7 @@ app.use(workFlowRouter);
 app.use(taskRouter);
 app.use(commentRouter);
 app.use(userworkflowRouter);
+
+app.use(errorHandler);
 
 module.exports = app;

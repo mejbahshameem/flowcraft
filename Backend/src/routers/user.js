@@ -117,22 +117,11 @@ router.post('/user/account/forget/password', authLimiter, escapehtml, async (req
 		});
 
 		if (!user) {
-			return res.status(400).send();
-		}
-
-		const isMatchPassword = req.body.password === req.body.confirmPassword;
-		if (!isMatchPassword) {
-			throw new Error('password does not match');
+			return res.status(200).send({ success: true });
 		}
 
 		const resetpasswordToken = await user.generateAccountToken();
-		sendResetPassword(
-			user.name,
-			user.email,
-			resetpasswordToken,
-			req.body.password
-		);
-		//Comment out this section for testing
+		sendResetPassword(user.name, user.email, resetpasswordToken);
 
 		res.status(200).send({ success: true });
 	} catch (error) {
@@ -140,10 +129,19 @@ router.post('/user/account/forget/password', authLimiter, escapehtml, async (req
 	}
 });
 
-// Reset/Approve New Password
-router.get('/user/account/reset', escapehtml, async (req, res) => {
+// Reset password with token and new password in request body
+router.post('/user/account/reset/password', authLimiter, escapehtml, async (req, res) => {
 	try {
-		const { token, password } = req.query;
+		const { token, password, confirmPassword } = req.body;
+
+		if (!token || !password || !confirmPassword) {
+			return res.status(400).json({ error: 'All fields are required' });
+		}
+
+		if (password !== confirmPassword) {
+			return res.status(400).json({ error: 'Passwords do not match' });
+		}
+
 		const decoded = jwt.verify(token, process.env.JWT_SECRET);
 		const user = await User.findOne({
 			_id: decoded._id,
@@ -151,16 +149,18 @@ router.get('/user/account/reset', escapehtml, async (req, res) => {
 		});
 
 		if (!user) {
-			return res.status(400).send();
+			return res.status(400).json({ error: 'Invalid or expired reset token' });
 		}
 
 		user.password = password;
 		user.tokens = [];
-
 		await user.save();
 
-		res.status(200).send({ success: true });
+		res.status(200).json({ success: true });
 	} catch (error) {
+		if (error.name === 'TokenExpiredError') {
+			return res.status(400).json({ error: 'Reset token has expired' });
+		}
 		res.status(400).send(error.message);
 	}
 });

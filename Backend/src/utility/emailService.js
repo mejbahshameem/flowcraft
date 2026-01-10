@@ -29,15 +29,16 @@ const sendDeactivationToken = (name, email, token) => {
 	});
 };
 
-const sendResetPassword = (name, email, resetpasswordToken, newPassword) => {
+const sendResetPassword = (name, email, resetpasswordToken) => {
 	sgMail.send({
 		from: senderEmail,
 		to: email,
-		subject: `|| Your New Password for FlowCraft ||`,
+		subject: `|| Reset Your Password for FlowCraft ||`,
 
-		html: `Dear ${name}, Did you want to change your password for FlowCraft?
-		If it was not you please ignore this email. Otheriwse, please click on the following link to reset your Password:<br>	
-		<a href="${frontendUrl}recoverpass.html?password=${newPassword}&token=${resetpasswordToken}">Reset Password</a>`,
+		html: `Dear ${name}, We received a request to reset your password for FlowCraft.
+		If it was not you please ignore this email. Otherwise, please click on the following link to choose a new password:<br>	
+		<a href="${frontendUrl}recoverpass.html?token=${resetpasswordToken}">Reset Password</a>
+		<br><br>This link will expire in 24 hours.`,
 	});
 };
 

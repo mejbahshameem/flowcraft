@@ -31,11 +31,11 @@ app.use(express.json({ limit: '10kb' }));
 app.use(mongoSanitize());
 
 app.use(healthRouter);
-app.use(userRouter);
-app.use(workFlowRouter);
-app.use(taskRouter);
-app.use(commentRouter);
-app.use(userworkflowRouter);
+app.use('/api/v1', userRouter);
+app.use('/api/v1', workFlowRouter);
+app.use('/api/v1', taskRouter);
+app.use('/api/v1', commentRouter);
+app.use('/api/v1', userworkflowRouter);
 
 app.use(errorHandler);
 

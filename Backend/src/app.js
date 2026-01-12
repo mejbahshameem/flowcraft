@@ -3,6 +3,8 @@ const helmet = require('helmet');
 const morgan = require('morgan');
 const cors = require('cors');
 const mongoSanitize = require('express-mongo-sanitize');
+const swaggerUi = require('swagger-ui-express');
+const swaggerSpec = require('./config/swagger');
 const errorHandler = require('./middleware/errorHandler');
 require('./db/mongoose');
 const userRouter = require('./routers/user');
@@ -31,6 +33,7 @@ app.use(express.json({ limit: '10kb' }));
 app.use(mongoSanitize());
 
 app.use(healthRouter);
+app.use('/api/docs', swaggerUi.serve, swaggerUi.setup(swaggerSpec));
 app.use('/api/v1', userRouter);
 app.use('/api/v1', workFlowRouter);
 app.use('/api/v1', taskRouter);

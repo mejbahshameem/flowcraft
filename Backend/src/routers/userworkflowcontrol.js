@@ -9,6 +9,17 @@ const { taskStatus } = require('../utility/enums');
 const moment = require('moment');
 const TaskNotification = require('../models/tasknotification');
 
+/**
+ * @swagger
+ * /users/me/workflowinstance/following/all:
+ *   get:
+ *     summary: Get all followed workflows with progress
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200: { description: List of followed workflows with completion percentage }
+ *       404: { description: Not following any workflows }
+ */
 //getting the currently following workflow of a user and also the current progress
 router.get(
 	'/users/me/workflowinstance/following/all',
@@ -73,6 +84,17 @@ router.get(
 	}
 );
 
+/**
+ * @swagger
+ * /user/me/created-workflows/all:
+ *   get:
+ *     summary: Get all workflows created by current user
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200: { description: List of created workflows with vote stats }
+ *       404: { description: No workflows found }
+ */
 //get all created workflows for a particular user
 router.get('/user/me/created-workflows/all', auth, async (req, res) => {
 	try {
@@ -103,6 +125,22 @@ router.get('/user/me/created-workflows/all', auth, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /following/workflow/{_id}/tasks/all:
+ *   get:
+ *     summary: Get all tasks for a followed workflow
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Task list with current step info }
+ *       400: { description: Workflow not found }
+ */
 //get all taskinstance for a particular workflowinstance
 router.get('/following/workflow/:_id/tasks/all', auth, async (req, res) => {
 	const { _id } = req.params;
@@ -123,6 +161,26 @@ router.get('/following/workflow/:_id/tasks/all', auth, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /following/workflow/{wfid}/task/{tkid}/start:
+ *   post:
+ *     summary: Start a task in a followed workflow
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: wfid
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: tkid
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Task started with time tracking }
+ *       400: { description: Invalid operation or task not found }
+ */
 // Start a particular task. Double Check Startability from the backend also
 router.post(
 	'/following/workflow/:wfid/task/:tkid/start',
@@ -165,6 +223,26 @@ router.post(
 	}
 );
 
+/**
+ * @swagger
+ * /following/workflow/{wfid}/task/{tkid}/end:
+ *   post:
+ *     summary: Complete a task in a followed workflow
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: wfid
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: tkid
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Task completed }
+ *       400: { description: Invalid operation or task not found }
+ */
 // End/Complete a particular task. Double Check Startability from the backend also
 router.post(
 	'/following/workflow/:wfid/task/:tkid/end',
@@ -259,6 +337,34 @@ router.post(
 	}
 );
 
+/**
+ * @swagger
+ * /following/workflow/{wfid}/task/{tkid}/notify:
+ *   post:
+ *     summary: Toggle task deadline email notification
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: wfid
+ *         required: true
+ *         schema: { type: string }
+ *       - in: path
+ *         name: tkid
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             properties:
+ *               task_notification: { type: boolean }
+ *     responses:
+ *       200: { description: Notification setting updated }
+ *       400: { description: Invalid task or already completed }
+ */
 // Enable/Disable task deadline email notification
 router.post(
 	'/following/workflow/:wfid/task/:tkid/notify',
@@ -285,6 +391,16 @@ router.post(
 	}
 );
 
+/**
+ * @swagger
+ * /user/voting/history:
+ *   get:
+ *     summary: Get voting history for current user
+ *     tags: [User Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200: { description: List of upvoted and downvoted workflows }
+ */
 // Get the voting history for a particular user
 router.get('/user/voting/history', auth, async (req, res) => {
 	try {

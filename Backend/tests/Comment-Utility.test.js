@@ -36,7 +36,7 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 	// finishing the calculation
 	//user is following a workflow first
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -52,7 +52,7 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -64,8 +64,7 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -125,7 +124,7 @@ test('Should notify user about task deadline', async done => {
 
 	//user is following a workflow first
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -141,7 +140,7 @@ test('Should notify user about task deadline', async done => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -153,8 +152,7 @@ test('Should notify user about task deadline', async done => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -203,7 +201,7 @@ test('Should notify user about task deadline', async done => {
 //3. Should Post a PUBLIC comment if the user is authenticated and to the public workflow view page
 test('Should post a Public comment', async () => {
 	const response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			workflow: `${workflow4._id}`,
@@ -223,7 +221,7 @@ test('Should post a Public comment', async () => {
 //4. Restrict guest user from posting a comment
 test('Should NOT post comment for guest User', async () => {
 	const response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.send({
 			workflow: `${workflow4._id}`,
 			comment: 'this is a public comment but should not be posted',
@@ -239,7 +237,7 @@ test('Should NOT post comment for guest User', async () => {
 //5. Should not Post a PRIVATE comment in a public workflow in after search workflow view page
 test('Should NOT post a Private comment in Public Workflow View', async () => {
 	const response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			workflow: `${workflow4._id}`,
@@ -261,7 +259,7 @@ test('Should post a PRIVATE comment in worfklow instance', async () => {
 
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -279,7 +277,7 @@ test('Should post a PRIVATE comment in worfklow instance', async () => {
 	// a private comment in his own following workflow to save some notes
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -309,7 +307,7 @@ test('Should NOT allow a PUBLIC comment in worfklow instance', async () => {
 
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -327,7 +325,7 @@ test('Should NOT allow a PUBLIC comment in worfklow instance', async () => {
 	// a private comment in his own following workflow to save some notes
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -350,7 +348,7 @@ test('Should NOT allow Private comment other than the owner', async () => {
 
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -368,7 +366,7 @@ test('Should NOT allow Private comment other than the owner', async () => {
 	// a private comment in his own following workflow to save some notes
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -387,7 +385,7 @@ test('Should NOT allow Private comment other than the owner', async () => {
 test('Should not show all tasks under a workflow to the user who is not owner', async () => {
 	// For testing this we will first make two public comments in workflow 4
 	let response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			workflow: `${workflow4._id}`,
@@ -400,7 +398,7 @@ test('Should not show all tasks under a workflow to the user who is not owner', 
 	//Posting second public comment from another user
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${workflow4._id}`,
@@ -411,7 +409,7 @@ test('Should not show all tasks under a workflow to the user who is not owner', 
 	expect(response.body.comment).toEqual('Second public comment');
 
 	response = await request(app)
-		.get(`/workflow/${workflow4._id}/comments/${'PUBLIC'}/all`)
+		.get(`/api/v1/workflow/${workflow4._id}/comments/${'PUBLIC'}/all`)
 		.send()
 		.expect(200);
 	expect(response.body.length).toBe(2);
@@ -423,7 +421,7 @@ test('Should not show all tasks under a workflow to the user who is not owner', 
 test('Should NOT Fetch Comments', async () => {
 	// For testing this we will first make two public comments in workflow 4
 	let response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			workflow: `${workflow4._id}`,
@@ -436,7 +434,7 @@ test('Should NOT Fetch Comments', async () => {
 	//Posting second public comment from another user
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${workflow4._id}`,
@@ -447,7 +445,7 @@ test('Should NOT Fetch Comments', async () => {
 	expect(response.body.comment).toEqual('Second public comment');
 
 	response = await request(app)
-		.get(`/workflow/${workflow4._id}/comments/${'PRIVATE'}/all`)
+		.get(`/api/v1/workflow/${workflow4._id}/comments/${'PRIVATE'}/all`)
 		.send()
 		.expect(400);
 });
@@ -457,7 +455,7 @@ test('Should GET all PRIVATE comments of a workflow instance', async () => {
 	// For testing this we will first need to follow a workflow and post private comments in that instance
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -475,7 +473,7 @@ test('Should GET all PRIVATE comments of a workflow instance', async () => {
 	// First private comment in his own following workflow to save some notes
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -485,7 +483,7 @@ test('Should GET all PRIVATE comments of a workflow instance', async () => {
 		.expect(201);
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -496,8 +494,7 @@ test('Should GET all PRIVATE comments of a workflow instance', async () => {
 
 	//For Fetching PRIVATE comments user token needs to be passed as Parameter
 	response = await request(app)
-		.get(
-			`/workflow/${wf_instance._id}/comments/${'PRIVATE'}/all/${
+		.get(`/api/v1/workflow/${wf_instance._id}/comments/${'PRIVATE'}/all/${
 				userOne.tokens[0].token
 			}`
 		)
@@ -516,7 +513,7 @@ test('Should NOT Fetch PRIVATE comments of another user', async () => {
 	// For testing this we will first need to follow a workflow and post private comments in that instance
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -534,7 +531,7 @@ test('Should NOT Fetch PRIVATE comments of another user', async () => {
 	// First private comment in his own following workflow to save some notes
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -544,7 +541,7 @@ test('Should NOT Fetch PRIVATE comments of another user', async () => {
 		.expect(201);
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -557,8 +554,7 @@ test('Should NOT Fetch PRIVATE comments of another user', async () => {
 	// But here instead of the user one who is owner the token of user two is passed
 	// as query params. Should send an error
 	response = await request(app)
-		.get(
-			`/workflow/${wf_instance._id}/comments/${'PRIVATE'}/all/${
+		.get(`/api/v1/workflow/${wf_instance._id}/comments/${'PRIVATE'}/all/${
 				usertwo.tokens[0].token
 			}`
 		)
@@ -571,7 +567,7 @@ test('Should NOT work PUBLIC comment Fetching for a workflow instance', async ()
 	// For testing this we will first need to follow a workflow and post private comments in that instance
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -589,7 +585,7 @@ test('Should NOT work PUBLIC comment Fetching for a workflow instance', async ()
 	// First private comment in his own following workflow to save some notes
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -599,7 +595,7 @@ test('Should NOT work PUBLIC comment Fetching for a workflow instance', async ()
 		.expect(201);
 
 	response = await request(app)
-		.post('/comment/post')
+		.post('/api/v1/comment/post')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			workflow: `${wf_instance._id}`,
@@ -612,8 +608,7 @@ test('Should NOT work PUBLIC comment Fetching for a workflow instance', async ()
 	// As there are no PUBLIC comments in an instance
 	// Should return status code 400
 	response = await request(app)
-		.get(
-			`/workflow/${wf_instance._id}/comments/${'PUBLIC'}/all/${
+		.get(`/api/v1/workflow/${wf_instance._id}/comments/${'PUBLIC'}/all/${
 				userOne.tokens[0].token
 			}`
 		)

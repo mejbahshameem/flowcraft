@@ -15,7 +15,7 @@ beforeEach(setupDatabase);
 //1. Signup a new user
 test('Should signup a new user', async () => {
 	await request(app)
-		.post('/users/create')
+		.post('/api/v1/users/create')
 		.send({
 			name: 'newuser',
 			email: 'newuser@example.com',
@@ -29,7 +29,7 @@ test('Should signup a new user', async () => {
 //2. Should not Signup a user with empty field which is required
 test('Should NOT signup a new user', async () => {
 	await request(app)
-		.post('/users/create')
+		.post('/api/v1/users/create')
 		.send({
 			name: '',
 			email: '',
@@ -42,7 +42,7 @@ test('Should NOT signup a new user', async () => {
 //3. Should not Signup a user with password and confirm password mismatch
 test('Should NOT signup a new user', async () => {
 	await request(app)
-		.post('/users/create')
+		.post('/api/v1/users/create')
 		.send({
 			name: 'riyadh',
 			email: 'riyadh@example.com',
@@ -56,7 +56,7 @@ test('Should NOT signup a new user', async () => {
 //4. Should not login with invalid credentials
 test('Should NOT login a user with invalid credentials', async () => {
 	const response = await request(app)
-		.post('/users/login')
+		.post('/api/v1/users/login')
 		.send({
 			email: 'invalid@example.com',
 			password: 'testpass123',
@@ -69,11 +69,11 @@ test('Should NOT login a user with invalid credentials', async () => {
 //5. Should activate user account and login
 test('Should activate a user', async () => {
 	await request(app)
-		.get(`/user/${userOne.tokens[0].token}`)
+		.get(`/api/v1/user/${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
 	const user = await request(app)
-		.post('/users/login')
+		.post('/api/v1/users/login')
 		.send({
 			email: 'testuser1@example.com',
 			password: 'testpass123',
@@ -84,7 +84,7 @@ test('Should activate a user', async () => {
 //6. should update user profile
 test('Should update profile for user', async () => {
 	const response = await request(app)
-		.patch('/users/me')
+		.patch('/api/v1/users/me')
 		//This is going to work if the service confirms that token is valid.
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
@@ -100,7 +100,7 @@ test('Should update profile for user', async () => {
 //7. should not update profile for unauthorized user
 test('Should not update profile for unauthenticated user', async () => {
 	await request(app)
-		.patch('/users/me')
+		.patch('/api/v1/users/me')
 		.send()
 		.expect(401);
 });
@@ -108,7 +108,7 @@ test('Should not update profile for unauthenticated user', async () => {
 //8. logout authenticated user
 test('Should log out for authenticated user', async () => {
 	await request(app)
-		.post('/users/logout')
+		.post('/api/v1/users/logout')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -117,7 +117,7 @@ test('Should log out for authenticated user', async () => {
 //9. Should not log out for unauthenticated user.
 test('Should not log out for unauthenticated user', async () => {
 	const res = await request(app)
-		.post('/users/logout')
+		.post('/api/v1/users/logout')
 		.send()
 		.expect(401);
 });
@@ -125,7 +125,7 @@ test('Should not log out for unauthenticated user', async () => {
 //10. Should Deregister user account approved
 test('Should Deregister a user', async () => {
 	const response = await request(app)
-		.post(`/deactivate/${userOne.tokens[0].token}`)
+		.post(`/api/v1/deactivate/${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
 	//also checking in the db for change of name
@@ -137,7 +137,7 @@ test('Should Deregister a user', async () => {
 //11. Request to deregister user account. An email should be sent
 test('Should send deregister request', async () => {
 	const response = await request(app)
-		.post(`/users/deactivate/${userOne.tokens[0].token}`)
+		.post(`/api/v1/users/deactivate/${userOne.tokens[0].token}`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -146,7 +146,7 @@ test('Should send deregister request', async () => {
 //12. Should Logout User from all devices after forget password reset
 test('Should Logout User from all devices', async () => {
 	await request(app)
-		.post(`/users/logoutAll/${userOne.tokens[0].token}`)
+		.post(`/api/v1/users/logoutAll/${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
 
@@ -163,7 +163,7 @@ test('Should Match a User with Different token', async () => {
 	);
 
 	let response = await request(app)
-		.get(`/match/${userOne.tokens[0].token}/${token2}`)
+		.get(`/api/v1/match/${userOne.tokens[0].token}/${token2}`)
 		.send()
 		.expect(200);
 
@@ -173,7 +173,7 @@ test('Should Match a User with Different token', async () => {
 //14. Should not match two users if their respective tokens are used
 test('Should NOT Match two User', async () => {
 	let response = await request(app)
-		.get(`/match/${userOne.tokens[0].token}/${usertwo.tokens[0].token}`) //Two different User. should not match
+		.get(`/api/v1/match/${userOne.tokens[0].token}/${usertwo.tokens[0].token}`) //Two different User. should not match
 		.send()
 		.expect(200);
 
@@ -184,7 +184,7 @@ test('Should NOT Match two User', async () => {
 test('Should NOT Work with wrong token', async () => {
 	let response = await request(app)
 		.get(
-			`/match/${'I am not a valid token'}/${'random token should be an ERROR'}`
+			`/api/v1/match/${'I am not a valid token'}/${'random token should be an ERROR'}`
 		)
 		.send()
 		.expect(500); //should throw an error from jsonwebtoken
@@ -193,40 +193,37 @@ test('Should NOT Work with wrong token', async () => {
 //16. Should send a request to reset the password after forgetting the account credentials
 test('Should send reset password request', async () => {
 	let response = await request(app)
-		.post('/user/account/forget/password')
+		.post('/api/v1/user/account/forget/password')
 		.send({
 			email: `${userOne.email}`,
-			password: 'newpassword1',
-			confirmPassword: 'newpassword1',
 		})
 		.expect(200);
 });
 
-//17. Should get an error if password and confirmPassword does not match wile resetting password
-test('Should NOT accept reset password request if passowrd mismatch', async () => {
+//17. Should return 200 even if email does not exist to prevent user enumeration
+test('Should return 200 for nonexistent email on password reset', async () => {
 	let response = await request(app)
-		.post('/user/account/forget/password')
+		.post('/api/v1/user/account/forget/password')
 		.send({
-			email: `${userOne.email}`,
-			password: 'newpassword1',
-			confirmPassword: 'does not match',
+			email: 'nonexistent@example.com',
 		})
-		.expect(400);
+		.expect(200);
 });
 
-//18. Should Approve new password if user clicks the link sent to their email
-// and if a valid token and valid password  are provided for that user in query params
+//18. Should set new password using token and new password in request body
 test('Should set New Password', async () => {
 	let response = await request(app)
-		.get(
-			`/user/account/reset?token=${userOne.tokens[0].token}&password=changingit`
-		)
-		.send()
+		.post('/api/v1/user/account/reset/password')
+		.send({
+			token: userOne.tokens[0].token,
+			password: 'changingit',
+			confirmPassword: 'changingit',
+		})
 		.expect(200);
 
 	//old password should not work // should get error 400
 	await request(app)
-		.post('/users/login')
+		.post('/api/v1/users/login')
 		.send({
 			email: 'testuser1@example.com',
 			password: 'testpass123',
@@ -235,7 +232,7 @@ test('Should set New Password', async () => {
 
 	//New password should work for loggin
 	await request(app)
-		.post('/users/login')
+		.post('/api/v1/users/login')
 		.send({
 			email: 'testuser1@example.com',
 			password: 'changingit',
@@ -243,15 +240,17 @@ test('Should set New Password', async () => {
 		.expect(200);
 });
 
-//19.Should not approve new password if the token is not valid
+//19. Should not approve new password if the token is not valid
 test('Should NOT set New Password with nonexisting token', async () => {
 	let response = await request(app)
-		.get(
-			`/user/account/reset?token=${jwt.sign(
+		.post('/api/v1/user/account/reset/password')
+		.send({
+			token: jwt.sign(
 				{ _id: userOne_id.toString() },
 				process.env.JWT_SECRET
-			)}&password=changingit`
-		)
-		.send()
+			),
+			password: 'changingit',
+			confirmPassword: 'changingit',
+		})
 		.expect(400);
 });

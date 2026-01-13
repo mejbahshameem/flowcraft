@@ -18,7 +18,7 @@ beforeEach(setupDatabase);
 //1. Should create a workflow
 test('Should Create a Workflow', async () => {
 	const response = await request(app)
-		.post('/workflow/create')
+		.post('/api/v1/workflow/create')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			name: 'workflow1',
@@ -34,7 +34,7 @@ test('Should Create a Workflow', async () => {
 //2. Should not create a workflow for a unauthenticated user
 test('Should not Create a Workflow for a unauthenticated user', async () => {
 	const response = await request(app)
-		.post('/workflow/create')
+		.post('/api/v1/workflow/create')
 		.send({
 			name: 'workflow1',
 			description: 'test suite workflow',
@@ -45,7 +45,7 @@ test('Should not Create a Workflow for a unauthenticated user', async () => {
 //3. Should not create a workflow without a workflow name and description
 test('Should not Create a Workflow without name and description', async () => {
 	const response = await request(app)
-		.post('/workflow/create')
+		.post('/api/v1/workflow/create')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			description: 'test suite workflow',
@@ -58,7 +58,7 @@ test('Should not Create a Workflow without name and description', async () => {
 //N.B.: Another user's workflow can be edited but for this first other user needs to copy the workflow which ultimately means editing own workflow
 test('Should edit a workflow', async () => {
 	const response = await request(app)
-		.patch(`/workflow/${workflow3._id}/edit`)
+		.patch(`/api/v1/workflow/${workflow3._id}/edit`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			name: 'Edited workflow3',
@@ -75,7 +75,7 @@ test('Should edit a workflow', async () => {
 //5. Should NOT edit a workflow by authentic user if invalid field is used
 test('Should NOT edit a workflow', async () => {
 	const response = await request(app)
-		.patch(`/workflow/${workflow3._id}/edit`)
+		.patch(`/api/v1/workflow/${workflow3._id}/edit`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			invalidEDIt: 'Edited workflow3',
@@ -86,7 +86,7 @@ test('Should NOT edit a workflow', async () => {
 //6. Should NOT edit a workflow by a logged in user who is not the owner
 test('Should NOT edit a workflow', async () => {
 	const response = await request(app)
-		.patch(`/workflow/${workflow3._id}/edit`)
+		.patch(`/api/v1/workflow/${workflow3._id}/edit`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			name: 'Edited workflow3',
@@ -97,7 +97,7 @@ test('Should NOT edit a workflow', async () => {
 //7. Should set deleted status of a workflow by authentic user means by owner
 test('Should set deleted status of a workflow', async () => {
 	const response = await request(app)
-		.delete(`/workflow/${workflow3._id}/delete`)
+		.delete(`/api/v1/workflow/${workflow3._id}/delete`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -110,7 +110,7 @@ test('Should set deleted status of a workflow', async () => {
 //8. Should create a Task
 test('Should Create a Task', async () => {
 	const response = await request(app)
-		.post('/workflow/tasks/create')
+		.post('/api/v1/workflow/tasks/create')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			name: 'Task1',
@@ -128,7 +128,7 @@ test('Should Create a Task', async () => {
 //9. Should not save a task in the workflow if workflow owner and task creator is different user
 test('Should not save a Task in the workflow', async () => {
 	const response = await request(app)
-		.post('/workflow/tasks/create')
+		.post('/api/v1/workflow/tasks/create')
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			name: 'Task2',
@@ -148,7 +148,7 @@ test('Should not save a Task in the workflow', async () => {
 //10. Should get all tasks for a particular workflow owner view
 test('Should show all tasks under a workflow', async () => {
 	const response = await request(app)
-		.get(`/workflow/${workflow3._id}/tasks/all`)
+		.get(`/api/v1/workflow/${workflow3._id}/tasks/all`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -159,7 +159,7 @@ test('Should show all tasks under a workflow', async () => {
 //11. Should not get all tasks for a particular workflow for a user who is not owner
 test('Should not show all tasks under a workflow to the user who is not owner', async () => {
 	const response = await request(app)
-		.get(`/workflow/${workflow3._id}/tasks/all`)
+		.get(`/api/v1/workflow/${workflow3._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(400);
@@ -168,7 +168,7 @@ test('Should not show all tasks under a workflow to the user who is not owner', 
 //12. Should edit a task by authentic user
 test('Should edit a task', async () => {
 	const response = await request(app)
-		.patch(`/workflow/${workflow3._id}/tasks/${task3._id}`)
+		.patch(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			name: 'Edited task3',
@@ -182,7 +182,7 @@ test('Should edit a task', async () => {
 //13. Should NOT edit a task by authentic user if invalid field is used
 test('Should NOT edit a task', async () => {
 	const response = await request(app)
-		.patch(`/workflow/${workflow3._id}/tasks/${task3._id}`)
+		.patch(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			invalidfield: 'Edited task3',
@@ -194,7 +194,7 @@ test('Should NOT edit a task', async () => {
 //The other registered user can not edit a task of a workflow if the user is not the owner/creator of the workflwo.
 test('Should not edit a task', async () => {
 	const response = await request(app)
-		.patch(`/workflow/${workflow3._id}/tasks/${task3._id}`)
+		.patch(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(400);
@@ -203,7 +203,7 @@ test('Should not edit a task', async () => {
 //15. Should delete a task by authentic user
 test('Should delete a task', async () => {
 	const response = await request(app)
-		.delete(`/workflow/${workflow3._id}/tasks/${task3._id}`)
+		.delete(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -212,7 +212,7 @@ test('Should delete a task', async () => {
 //16. Should not delete a task by the others rather than creator
 test('Should not delete a task', async () => {
 	const response = await request(app)
-		.delete(`/workflow/${workflow3._id}/tasks/${task3._id}`)
+		.delete(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(400);
@@ -229,7 +229,7 @@ test('Should not delete a task', async () => {
 
 test('Should Copy/clone a existing Workflow', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow3._id}/copy`)
+		.post(`/api/v1/workflow/${workflow3._id}/copy`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(201);
@@ -247,7 +247,7 @@ test('Should Copy/clone a existing Workflow', async () => {
 // Workflow Editing is a feature only for registered logged in user
 test('Should not Copy a existing Workflow', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow1._id}/copy`)
+		.post(`/api/v1/workflow/${workflow1._id}/copy`)
 		.send()
 		.expect(401);
 });
@@ -258,7 +258,7 @@ test('Should GET Voting history of a user', async () => {
 	// To get the voting history user first needs to vote in a workflow
 	// first voting from userOne to workflow 4
 	await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -267,7 +267,7 @@ test('Should GET Voting history of a user', async () => {
 
 	// Lets give a down vote to workflow3
 	await request(app)
-		.post(`/workflow/${workflow3._id}/vote`)
+		.post(`/api/v1/workflow/${workflow3._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.DOWN_VOTE,
@@ -275,7 +275,7 @@ test('Should GET Voting history of a user', async () => {
 		.expect(200);
 
 	const response = await request(app)
-		.get('/user/voting/history')
+		.get('/api/v1/user/voting/history')
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);

@@ -22,7 +22,7 @@ beforeEach(setupDatabase);
 //1. Registered user following a workflow
 test('Should follow a workflow', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -35,7 +35,7 @@ test('Should follow a workflow', async () => {
 //2. Guest user is not allowed to follow a workflow
 test('Should not follow a workflow', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.send()
 		.expect(401);
 });
@@ -43,7 +43,7 @@ test('Should not follow a workflow', async () => {
 //3. Registered user voting a workflow
 test('Should vote a workflow', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -58,7 +58,7 @@ test('Should vote a workflow', async () => {
 //4. Registered user voting a workflow then change the vote
 test('Should change the vote of the workflow', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -70,7 +70,7 @@ test('Should change the vote of the workflow', async () => {
 	expect(wf.voting.up_vote.length).toEqual(1);
 
 	const res = await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.DOWN_VOTE,
@@ -86,7 +86,7 @@ test('Should change the vote of the workflow', async () => {
 //5. Same user can not up_vote Twice from the same account
 test('Should not up_vote/down_vote twice from same user', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -98,7 +98,7 @@ test('Should not up_vote/down_vote twice from same user', async () => {
 	expect(wf.voting.up_vote.length).toEqual(1);
 
 	const res = await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE, //upvote again from the same user
@@ -114,7 +114,7 @@ test('Should not up_vote/down_vote twice from same user', async () => {
 //6. Unauthenticated user can not vote
 test('Should not vote from unauthenticated user', async () => {
 	const response = await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.send({
 			vote: vote.UP_VOTE,
 		})
@@ -125,7 +125,7 @@ test('Should not vote from unauthenticated user', async () => {
 //this api. However options avaialble in this page like follow, voting are not accessible for guest user.
 test('Should Show workflow information(tasks and descriptions)', async () => {
 	const response = await request(app)
-		.get(`/workflow/${workflow4._id}/view`)
+		.get(`/api/v1/workflow/${workflow4._id}/view`)
 		.send()
 		.expect(200);
 });
@@ -134,7 +134,7 @@ test('Should Show workflow information(tasks and descriptions)', async () => {
 test('Should show popular workflows', async () => {
 	//first voting from userOne to workflow 4
 	await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -142,7 +142,7 @@ test('Should show popular workflows', async () => {
 		.expect(200);
 	// voting from userOne to downvote workflow 3
 	await request(app)
-		.post(`/workflow/${workflow3._id}/vote`)
+		.post(`/api/v1/workflow/${workflow3._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.DOWN_VOTE,
@@ -151,7 +151,7 @@ test('Should show popular workflows', async () => {
 
 	// voting from userTwo to upvote workflow 1
 	await request(app)
-		.post(`/workflow/${workflow1._id}/vote`)
+		.post(`/api/v1/workflow/${workflow1._id}/vote`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -159,7 +159,7 @@ test('Should show popular workflows', async () => {
 		.expect(200);
 
 	const response = await request(app)
-		.get(`/workflows/popular`)
+		.get(`/api/v1/workflows/popular`)
 		.send()
 		.expect(200);
 	// in response workflow is sorted according to the up_vote rank
@@ -168,7 +168,7 @@ test('Should show popular workflows', async () => {
 //9. Should show search result according to most recent update time
 test('Should Show search result by most recently craeted', async () => {
 	const response = await request(app)
-		.get(`/search`)
+		.get(`/api/v1/search`)
 		.send({
 			location: 'saarbrucken',
 		})
@@ -182,7 +182,7 @@ test('Should Show search result by most recently craeted', async () => {
 test('Should Show search result by most top votes first', async () => {
 	//workflow 4 getting one up vote
 	await request(app)
-		.post(`/workflow/${workflow4._id}/vote`)
+		.post(`/api/v1/workflow/${workflow4._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -191,7 +191,7 @@ test('Should Show search result by most top votes first', async () => {
 
 	//workflow 1 getting one up vote
 	await request(app)
-		.post(`/workflow/${workflow1._id}/vote`)
+		.post(`/api/v1/workflow/${workflow1._id}/vote`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -200,7 +200,7 @@ test('Should Show search result by most top votes first', async () => {
 
 	//workflow 1 getting ANOTHER up vote from different user
 	await request(app)
-		.post(`/workflow/${workflow1._id}/vote`)
+		.post(`/api/v1/workflow/${workflow1._id}/vote`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send({
 			vote: vote.UP_VOTE,
@@ -208,7 +208,7 @@ test('Should Show search result by most top votes first', async () => {
 		.expect(200);
 
 	const response = await request(app)
-		.get(`/search?sortBy=up_vote`) //in this search result workflow 1 comes before workflow 4 as 1 has more up_votes.
+		.get(`/api/v1/search?sortBy=up_vote`) //in this search result workflow 1 comes before workflow 4 as 1 has more up_votes.
 		.send({
 			location: 'saarbrucken',
 		})
@@ -220,7 +220,7 @@ test('Should Show search result by most top votes first', async () => {
 test('Should show currently following workflow of a user and also the current progress', async () => {
 	//first making sure userOne is following workflow 4. Code inherited from test case 1 of this file
 	await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -232,7 +232,7 @@ test('Should show currently following workflow of a user and also the current pr
 
 	//Then making sure userOne is following workflow 3. Code inherited from test case 1 of this file
 	await request(app)
-		.post(`/workflow/${workflow3._id}/follow`)
+		.post(`/api/v1/workflow/${workflow3._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -245,7 +245,7 @@ test('Should show currently following workflow of a user and also the current pr
 	//Finally Should show currently following all the workflows of a user and also the current progress
 	//of those workflows for this particular user.
 	const response = await request(app)
-		.get(`/users/me/workflowinstance/following/all`)
+		.get(`/api/v1/users/me/workflowinstance/following/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -256,7 +256,7 @@ test('Should show currently following workflow of a user and also the current pr
 //*12. Should Get all the created workflows for a particular owner
 test('Should show all the workflows created by particular user', async () => {
 	const response = await request(app)
-		.get(`/user/me/created-workflows/all`)
+		.get(`/api/v1/user/me/created-workflows/all`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -270,7 +270,7 @@ test('Should show all the workflows created by particular user', async () => {
 //*13. Should not Get all the created workflows for a particular owner without log in
 test('Should not show the workflows created by particular user witohut authentication', async () => {
 	const response = await request(app)
-		.get(`/user/me/created-workflows/all`)
+		.get(`/api/v1/user/me/created-workflows/all`)
 		.send()
 		.expect(401);
 });
@@ -282,7 +282,7 @@ test('Should not show deleted workflows in created workflow list', async () => {
 	//The below code inherited from wrokflow test suite test 7
 
 	let response = await request(app)
-		.delete(`/workflow/${workflow3._id}/delete`)
+		.delete(`/api/v1/workflow/${workflow3._id}/delete`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -294,7 +294,7 @@ test('Should not show deleted workflows in created workflow list', async () => {
 	//Getting the list of workflows created by usertwo which should omit workflow 3 as its
 	//deleted status is now true
 	response = await request(app)
-		.get(`/user/me/created-workflows/all`)
+		.get(`/api/v1/user/me/created-workflows/all`)
 		.set('Authorization', `Bearer ${usertwo.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -307,7 +307,7 @@ test('Should get all tasks instance inside a workflow instances', async () => {
 	//for this test case we will first inherit code from the first test case of this suite
 	//which is following a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -323,7 +323,7 @@ test('Should get all tasks instance inside a workflow instances', async () => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	response = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -339,7 +339,7 @@ test('Should START a task', async () => {
 	//we will inherit the code of the previous test case
 	//which is following a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -355,7 +355,7 @@ test('Should START a task', async () => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -367,8 +367,7 @@ test('Should START a task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -390,7 +389,7 @@ test('Should END a started task', async () => {
 	// and also we will inherit the code of the test case 15 of this suite
 	// we will take the code from above test case also because for ending a task we first need to start it
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -406,7 +405,7 @@ test('Should END a started task', async () => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -418,8 +417,7 @@ test('Should END a started task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -433,8 +431,7 @@ test('Should END a started task', async () => {
 
 	//Now we can also End this task as it is in progress.
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/end`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/end`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -453,7 +450,7 @@ test('Should UNFOLLOW a workflow instance', async () => {
 	// For unfollowing user first needs to follow the workflow
 	// So first user needs to follow a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -468,7 +465,7 @@ test('Should UNFOLLOW a workflow instance', async () => {
 	});
 
 	response = await request(app)
-		.get(`/workflow-instance/${wf_instance._id}/unfollow`)
+		.get(`/api/v1/workflow-instance/${wf_instance._id}/unfollow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -489,7 +486,7 @@ test('Should set Task Deadline notification', async () => {
 	// and also we will inherit the code of the test case 15 of this suite to start the task
 
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -505,7 +502,7 @@ test('Should set Task Deadline notification', async () => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -517,8 +514,7 @@ test('Should set Task Deadline notification', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -531,8 +527,7 @@ test('Should set Task Deadline notification', async () => {
 	expect(task.status).toEqual(taskStatus.IN_PROGRESS);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/notify`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/notify`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
@@ -548,7 +543,7 @@ test('Should NOT START a task which is not startable', async () => {
 	//we will inherit the code of the previous test case
 	//which is following a workflow
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -564,7 +559,7 @@ test('Should NOT START a task which is not startable', async () => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -576,8 +571,7 @@ test('Should NOT START a task which is not startable', async () => {
 	const index_second_step = tasks.body.findIndex(task => task.step_no === 2);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/start`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -593,7 +587,7 @@ test('Should NOT END a task', async () => {
 	// we will try to end a task which has not been started
 	// we will take the code from above test case also because for ending a task we first need to start it
 	let response = await request(app)
-		.post(`/workflow/${workflow4._id}/follow`)
+		.post(`/api/v1/workflow/${workflow4._id}/follow`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -609,7 +603,7 @@ test('Should NOT END a task', async () => {
 
 	// Finally now we can get all newly created task instances for this workflow instance
 	let tasks = await request(app)
-		.get(`/following/workflow/${wf_instance._id}/tasks/all`)
+		.get(`/api/v1/following/workflow/${wf_instance._id}/tasks/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
@@ -621,8 +615,7 @@ test('Should NOT END a task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -639,8 +632,7 @@ test('Should NOT END a task', async () => {
 	const index_second_step = tasks.body.findIndex(task => task.step_no === 2);
 
 	response = await request(app)
-		.post(
-			`/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/end`
+		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/end`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -650,7 +642,7 @@ test('Should NOT END a task', async () => {
 //22. Should send empty not found 404 code if no following workflow is found
 test('Should NOT show following workflow if user does not have any', async () => {
 	const response = await request(app)
-		.get(`/users/me/workflowinstance/following/all`)
+		.get(`/api/v1/users/me/workflowinstance/following/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(404);

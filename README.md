@@ -35,10 +35,12 @@ A collaborative platform for creating, sharing, and executing step by step workf
 | Backend | Node.js, Express 4.21, Mongoose 8.9 |
 | Database | MongoDB |
 | Frontend | HTML5, JavaScript, jQuery, Bootstrap 4 |
-| Auth | JSON Web Tokens (JWT), bcrypt |
+| Auth | JSON Web Tokens (JWT) with expiration, bcrypt (12 rounds) |
+| Security | Helmet, CORS, rate limiting, mongo sanitize |
 | Email | SendGrid |
 | Scheduling | node schedule (cron jobs for deadline reminders) |
 | Image Processing | Sharp |
+| API Docs | Swagger / OpenAPI 3.0 at `/api/docs` |
 | Testing | Jest, Supertest |
 
 ## Project Structure
@@ -143,6 +145,8 @@ npm test
 
 ## API Overview
 
+All API endpoints are versioned under `/api/v1`. Interactive documentation is available at `/api/docs` when the server is running.
+
 | Resource | Endpoints |
 |----------|-----------|
 | Users | Registration, login, logout, profile update, avatar upload, password reset, account activation/deactivation |
@@ -150,6 +154,7 @@ npm test
 | Tasks | Create, edit, delete within workflows |
 | Task Control | Start/end tasks, toggle notifications, progress tracking |
 | Comments | Post and retrieve public/private comments |
+| Health | `GET /health` server health check |
 
 ## License
 

@@ -17,7 +17,7 @@ const scheduling = schedule.scheduleJob(
 				status: taskStatus.IN_PROGRESS,
 				notification: true,
 			});
-			tasks.forEach(task => {
+			for (const task of tasks) {
 				if (
 					moment
 						.duration(
@@ -55,7 +55,7 @@ const scheduling = schedule.scheduleJob(
 						throw new Error(error.message);
 					}
 				}
-			});
+			}
 		} catch (error) {
 			console.log(error);
 		}

@@ -33,7 +33,7 @@ src/
 │   ├── userworkflowcontrol.js # Follow, progress, task execution
 │   └── health.js           # Health check endpoint
 └── utility/
-    ├── emailService.js     # SendGrid email functions
+    ├── emailService.js     # Resend email functions
     ├── cronjobs.js         # Deadline notification scheduler
     ├── enums.js            # Shared constants
     └── validateEnv.js      # Environment variable validation
@@ -124,7 +124,7 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 | PORT | Yes | Server port (default: 3000) |
 | MONGODB_URL | Yes | MongoDB connection string |
 | JWT_SECRET | Yes | Secret key for signing JWT tokens |
-| SendGrid_API_Key | Yes | SendGrid API key for emails |
+| Resend_API_Key | Yes | Resend API key for emails |
 | SENDER_EMAIL | Yes | Verified sender email address |
 | FRONTEND_URL | Yes | Frontend URL for email links |
 | CORS_ORIGIN | No | Comma separated allowed origins |

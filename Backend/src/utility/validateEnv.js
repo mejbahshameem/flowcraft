@@ -2,6 +2,7 @@ const requiredVars = [
 	'PORT',
 	'MONGODB_URL',
 	'JWT_SECRET',
+	'Resend_API_Key',
 	'SENDER_EMAIL',
 	'FRONTEND_URL',
 ];

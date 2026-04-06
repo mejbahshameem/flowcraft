@@ -3,7 +3,6 @@ const validator = require('validator');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
 const { useraccountStatus } = require('../utility/eunms');
-const fs = require('fs');
 const userSchema = new mongoose.Schema(
 	{
 		name: {

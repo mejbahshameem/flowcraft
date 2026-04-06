@@ -73,16 +73,14 @@ router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res) => {
 			return res.status(400).send();
 		}
 
-		await Comment.find({
+		const comments = await Comment.find({
 			workflow: _id,
 			comment_type: type,
 		})
-			.populate('commenter', 'name')
-			.exec(function(error, comments) {
-				if (error) return res.status(400).send(error);
-				if (!comments) return res.status(404).send();
-				res.status(200).send(comments);
-			});
+			.populate('commenter', 'name');
+
+		if (!comments) return res.status(404).send();
+		res.status(200).send(comments);
 	} catch (error) {
 		res.status(500).send();
 	}

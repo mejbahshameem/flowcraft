@@ -1,6 +1,9 @@
+const validateEnv = require('./utility/validateEnv');
+validateEnv();
+
 const app = require('./app');
 const port = process.env.PORT;
 
 app.listen(port, () => {
-	console.log('Server is Running!');
+	console.log(`Server is running on port ${port}`);
 });

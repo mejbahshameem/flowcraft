@@ -9,9 +9,32 @@ const jwt = require('jsonwebtoken');
 const WorkFlowInstance = require('../models/workflowinstance');
 const TaskInstance = require('../models/taskinstance');
 const Task = require('../models/task');
-const { vote } = require('../utility/eunms');
-const { workflowAccess } = require('../utility/eunms');
+const { vote } = require('../utility/enums');
+const { workflowAccess } = require('../utility/enums');
 
+/**
+ * @swagger
+ * /workflow/create:
+ *   post:
+ *     summary: Create a new workflow
+ *     tags: [Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [name, description, location]
+ *             properties:
+ *               name: { type: string }
+ *               description: { type: string }
+ *               location: { type: string }
+ *               access: { type: string, enum: [public, private] }
+ *     responses:
+ *       201: { description: Workflow created }
+ *       400: { description: Validation error }
+ */
 //Create a workflow
 router.post('/workflow/create', auth, escapehtml, async (req, res) => {
 	try {
@@ -26,6 +49,22 @@ router.post('/workflow/create', auth, escapehtml, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow/{_id}/copy:
+ *   post:
+ *     summary: Copy another user's workflow for editing
+ *     tags: [Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       201: { description: Workflow copied }
+ *       400: { description: Workflow not found }
+ */
 //Copy a workflow of another user for editing
 router.post('/workflow/:_id/copy', auth, async (req, res) => {
 	const { _id } = req.params;
@@ -114,6 +153,22 @@ router.patch('/workflow/:_id/edit', auth, escapehtml, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow/{_id}/delete:
+ *   delete:
+ *     summary: Soft delete a workflow
+ *     tags: [Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Workflow deleted }
+ *       400: { description: Not found }
+ */
 //delete created workflow
 router.delete('/workflow/:_id/delete', auth, async (req, res) => {
 	const { _id } = req.params;
@@ -157,6 +212,22 @@ router.delete('/workflow/:_id/delete', auth, async (req, res) => {
 // 	}
 // });
 
+/**
+ * @swagger
+ * /workflow/{_id}/follow:
+ *   post:
+ *     summary: Follow a workflow
+ *     tags: [Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Now following the workflow }
+ *       400: { description: Already following or workflow deleted }
+ */
 //Registered user following a workflow
 router.post('/workflow/:_id/follow', auth, async (req, res) => {
 	try {
@@ -222,6 +293,22 @@ router.post('/workflow/:_id/follow', auth, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow-instance/{_id}/unfollow:
+ *   get:
+ *     summary: Unfollow a workflow
+ *     tags: [Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Unfollowed successfully }
+ *       400: { description: Not following this workflow }
+ */
 //Registered user unfollowing a workflow
 router.get('/workflow-instance/:_id/unfollow', auth, async (req, res) => {
 	try {
@@ -272,6 +359,31 @@ router.get('/workflow-instance/:_id/unfollow', auth, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow/{_id}/vote:
+ *   post:
+ *     summary: Upvote or downvote a workflow
+ *     tags: [Workflows]
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [vote]
+ *             properties:
+ *               vote: { type: string, enum: [up_vote, down_vote] }
+ *     responses:
+ *       200: { description: Vote recorded }
+ *       400: { description: Already voted or invalid vote }
+ */
 //Registered user voting a workflow
 router.post('/workflow/:_id/vote', auth, escapehtml, async (req, res) => {
 	const { _id } = req.params;
@@ -361,6 +473,21 @@ router.post('/workflow/:_id/vote', auth, escapehtml, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow/{_id}/view:
+ *   get:
+ *     summary: View workflow details and tasks
+ *     tags: [Workflows]
+ *     parameters:
+ *       - in: path
+ *         name: _id
+ *         required: true
+ *         schema: { type: string }
+ *     responses:
+ *       200: { description: Workflow details with tasks }
+ *       400: { description: Workflow not found }
+ */
 //view the workflow after clicking from search result
 router.get('/workflow/:_id/view', async (req, res) => {
 	const { _id } = req.params;
@@ -393,6 +520,15 @@ router.get('/workflow/:_id/view', async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflows/popular:
+ *   get:
+ *     summary: Get top 10 popular workflows by upvotes
+ *     tags: [Workflows]
+ *     responses:
+ *       200: { description: List of popular workflows }
+ */
 //popular workflow by the #of upvotes
 router.get('/workflows/popular', async (req, res) => {
 	try {
@@ -434,6 +570,31 @@ router.get('/workflows/popular', async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /search:
+ *   get:
+ *     summary: Search workflows by interest and location
+ *     tags: [Workflows]
+ *     parameters:
+ *       - in: query
+ *         name: interest
+ *         schema: { type: string }
+ *       - in: query
+ *         name: location
+ *         schema: { type: string }
+ *       - in: query
+ *         name: sortBy
+ *         schema: { type: string, enum: [createdAt, up_vote] }
+ *       - in: query
+ *         name: limit
+ *         schema: { type: integer }
+ *       - in: query
+ *         name: skip
+ *         schema: { type: integer }
+ *     responses:
+ *       200: { description: Search results }
+ */
 //Get Search result
 router.get('/search', escapehtml, async (req, res) => {
 	var sortBy = 'createdAt';

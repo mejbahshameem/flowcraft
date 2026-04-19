@@ -34,7 +34,7 @@ A collaborative platform for creating, sharing, and executing step by step workf
 |-------|-----------|
 | Backend | Node.js, Express 4.21, Mongoose 8.9 |
 | Database | MongoDB |
-| Frontend | HTML5, JavaScript, jQuery, Bootstrap 4 |
+| Frontend | Angular 20, Angular Material 3, TypeScript 5.9, SCSS |
 | Auth | JSON Web Tokens (JWT) with expiration, bcrypt (12 rounds) |
 | Security | Helmet, CORS, rate limiting, mongo sanitize |
 | Email | Resend |
@@ -56,11 +56,14 @@ Backend/
         routers/         # Express route handlers
         utility/         # Cron jobs, email, enums
     tests/               # Backend test suites
-Frontend/
-    css/                 # Stylesheets
-    js/                  # Client side JavaScript
-    tests/               # Frontend test suites
-    *.html               # Page templates
+frontend/
+    src/
+        app/
+            core/        # Models, services, auth, interceptors
+            features/    # Page components (auth, home, search)
+            shared/      # Reusable components and validators
+        environments/    # Environment configs
+    proxy.conf.json      # Dev proxy to backend
 README.md
 ```
 
@@ -97,7 +100,7 @@ README.md
    JWT_SECRET=<your_secret>
    Resend_API_Key=<your_resend_key>
    SENDER_EMAIL=<your_verified_sender>
-   FRONTEND_URL=http://localhost:8080/
+   FRONTEND_URL=http://localhost:4200/
    ```
    Use a different MONGODB_URL database name for test.env.
 
@@ -108,24 +111,22 @@ README.md
 
 ### Frontend Setup
 
-1. Install a static file server:
+1. Navigate to the frontend directory:
    ```
-   npm install http-server -g
-   ```
-
-2. Navigate to the Frontend directory:
-   ```
-   cd Frontend
+   cd frontend
    ```
 
-3. Start the server:
+2. Install dependencies:
    ```
-   http-server
+   npm install
    ```
 
-4. Open http://localhost:8080 in your browser.
+3. Start the Angular development server with backend proxy:
+   ```
+   npx ng serve
+   ```
 
-5. To point the frontend to a different backend URL, edit the getHostUrl() function in Frontend/js/dependency.js.
+4. Open http://localhost:4200 in your browser. API requests are proxied to the backend on port 3000.
 
 ### Running Tests
 
@@ -139,8 +140,8 @@ Make sure config/test.env is configured with a valid Resend API key and a separa
 
 **Frontend tests:**
 ```
-cd Frontend
-npm test
+cd frontend
+npx ng test
 ```
 
 ## API Overview

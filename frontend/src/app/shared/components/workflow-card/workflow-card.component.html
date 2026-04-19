@@ -1,0 +1,23 @@
+<mat-card class="workflow-card" [routerLink]="['/workflow', workflow()._id]">
+  <mat-card-header>
+    <mat-card-title>{{ workflow().name }}</mat-card-title>
+    <mat-card-subtitle>by {{ getOwnerName() }}</mat-card-subtitle>
+  </mat-card-header>
+  <mat-card-content>
+    <p class="description">{{ workflow().description }}</p>
+    @if (workflow().location) {
+      <mat-chip-set>
+        <mat-chip>
+          <mat-icon matChipAvatar>location_on</mat-icon>
+          {{ workflow().location }}
+        </mat-chip>
+      </mat-chip-set>
+    }
+  </mat-card-content>
+  <mat-card-actions align="end">
+    <div class="vote-display">
+      <mat-icon>thumb_up</mat-icon>
+      <span>{{ getVoteCount() }}</span>
+    </div>
+  </mat-card-actions>
+</mat-card>

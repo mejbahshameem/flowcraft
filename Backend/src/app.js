@@ -19,7 +19,7 @@ const app = express();
 
 const allowedOrigins = process.env.CORS_ORIGIN
 	? process.env.CORS_ORIGIN.split(',')
-	: ['http://localhost:4200', 'http://localhost:8080'];
+	: ['http://localhost:4200'];
 
 app.use(helmet());
 app.use(cors({

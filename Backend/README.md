@@ -66,6 +66,7 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 | POST | /users/logout | Yes | Logout current session |
 | POST | /users/logoutAll/:token | No | Logout all sessions |
 | GET | /user/:token | No | Activate account by token |
+| GET | /users/me | Yes | Get current authenticated user profile |
 | PATCH | /users/me | Yes | Update profile |
 | POST | /users/me/avatar | Yes | Upload avatar (jpg, jpeg, png) |
 | POST | /users/deactivate/:token | Yes | Request account deactivation |

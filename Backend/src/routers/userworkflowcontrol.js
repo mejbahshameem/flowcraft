@@ -28,9 +28,9 @@ router.get(
 		try {
 			const user = await User.findById(req.user._id);
 
-			//check if number of workflow following is zero
+			//return empty list for users not following any workflow yet
 			if (user.followedworkflow.length === 0) {
-				return res.status(404).send();
+				return res.status(200).send([]);
 			}
 
 			// checking unfinished workflow

@@ -45,7 +45,7 @@ export class CommentSectionComponent implements OnInit {
   }
 
   loadComments(): void {
-    this.commentService.getComments(this.workflowId(), 'public').subscribe({
+    this.commentService.getComments(this.workflowId(), 'PUBLIC').subscribe({
       next: (data) => this.comments.set(data),
       error: () => {},
     });
@@ -56,7 +56,7 @@ export class CommentSectionComponent implements OnInit {
     if (!text || !this.isLoggedIn()) return;
 
     this.submitting.set(true);
-    this.commentService.postComment(text, this.workflowId(), 'public').subscribe({
+    this.commentService.postComment(text, this.workflowId(), 'PUBLIC').subscribe({
       next: () => {
         this.newComment = '';
         this.submitting.set(false);

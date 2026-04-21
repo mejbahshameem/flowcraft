@@ -64,6 +64,8 @@ export class WorkflowService {
   }
 
   vote(id: string, vote: string): Observable<{ success: string | boolean }> {
-    return this.http.post<{ success: string | boolean }>(`${this.apiUrl}/workflow/${id}/vote`, { vote });
+    return this.http.post<{ success: string | boolean }>(`${this.apiUrl}/workflow/${id}/vote`, {
+      vote: vote.toUpperCase(),
+    });
   }
 }

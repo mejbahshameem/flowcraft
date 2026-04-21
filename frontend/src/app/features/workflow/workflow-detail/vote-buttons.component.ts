@@ -13,11 +13,11 @@ import { AuthService } from '../../../core/auth/auth.service';
   imports: [MatButtonModule, MatIconModule, MatSnackBarModule],
   template: `
     <div class="vote-buttons">
-      <button mat-icon-button (click)="onVote('up_vote')" [class.voted]="userVote() === 'up'">
+      <button mat-icon-button (click)="onVote('UP_VOTE')" [class.voted]="userVote() === 'up'">
         <mat-icon>thumb_up</mat-icon>
       </button>
       <span class="vote-count">{{ currentUpVotes() }}</span>
-      <button mat-icon-button (click)="onVote('down_vote')" [class.voted-down]="userVote() === 'down'">
+      <button mat-icon-button (click)="onVote('DOWN_VOTE')" [class.voted-down]="userVote() === 'down'">
         <mat-icon>thumb_down</mat-icon>
       </button>
       <span class="vote-count">{{ currentDownVotes() }}</span>
@@ -65,7 +65,7 @@ export class VoteButtonsComponent {
 
     this.workflowService.vote(this.workflowId(), voteType).subscribe({
       next: () => {
-        if (voteType === 'up_vote') {
+        if (voteType === 'UP_VOTE') {
           if (this.userVote() === 'down') {
             this.currentDownVotes.update(v => Math.max(0, v - 1));
           }

@@ -34,3 +34,13 @@
 .delete-btn {
   color: var(--mat-sys-error);
 }
+
+.copy-chip {
+  margin-left: 8px;
+  font-size: 11px;
+  min-height: 22px;
+  padding: 2px 8px;
+  background: var(--mat-sys-secondary-container);
+  color: var(--mat-sys-on-secondary-container);
+  vertical-align: middle;
+}

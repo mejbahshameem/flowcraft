@@ -115,6 +115,7 @@ router.get('/user/me/created-workflows/all', auth, async (req, res) => {
 				up_votes: workflow.voting.up_vote.length,
 				down_votes: workflow.voting.down_vote.length,
 				followers: workflow.followers.length,
+				is_copy: Boolean(workflow.source_workflow),
 			});
 			return acc;
 		},

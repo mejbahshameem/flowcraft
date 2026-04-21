@@ -530,7 +530,7 @@ router.get('/workflow/:_id/view', async (req, res) => {
  *       200: { description: List of popular workflows }
  */
 //popular workflow by the #of upvotes
-router.get('/workflows/popular', async (req, res) => {
+router.get('/workflows/popular', async (req, res, next) => {
 	try {
 		const workflows = await WorkFlow.find({ deleted: false }).select(
 			'_id name voting'
@@ -547,7 +547,7 @@ router.get('/workflows/popular', async (req, res) => {
 
 		res.status(200).send(popular);
 	} catch (error) {
-		res.status(500).send(error);
+		next(error);
 	}
 });
 

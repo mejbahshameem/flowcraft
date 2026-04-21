@@ -78,6 +78,7 @@ router.post('/workflow/:_id/copy', auth, async (req, res) => {
 			description: wf.description,
 			location: wf.location,
 			owner: req.user._id,
+			source_workflow: wf._id,
 		});
 
 		const promises = [];

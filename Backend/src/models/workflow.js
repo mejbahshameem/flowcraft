@@ -64,6 +64,11 @@ const workFlowSchema = new mongoose.Schema(
 			ref: 'User',
 		},
 
+		source_workflow: {
+			type: mongoose.Schema.Types.ObjectId,
+			ref: 'WorkFlow',
+		},
+
 		followers: [
 			{
 				follower: {

@@ -49,7 +49,7 @@ export class WorkflowCreateComponent implements OnInit {
     name: ['', [Validators.required, Validators.maxLength(120)]],
     description: ['', [Validators.required, Validators.maxLength(500)]],
     location: ['', [Validators.required, Validators.maxLength(100)]],
-    access: ['public'],
+    access: ['PUBLIC'],
   });
 
   taskForm = this.fb.group({
@@ -77,7 +77,7 @@ export class WorkflowCreateComponent implements OnInit {
           name: data.name,
           description: data.description,
           location: data.location,
-          access: data.access || 'public',
+          access: data.access || 'PUBLIC',
         });
         data.tasks
           .sort((a, b) => a.step_no - b.step_no)
@@ -140,7 +140,7 @@ export class WorkflowCreateComponent implements OnInit {
         name: info.name!,
         description: info.description!,
         location: info.location!,
-        access: info.access!,
+        access: (info.access || 'PUBLIC').toUpperCase(),
       }).subscribe({
         next: () => this.saveTasks(this.workflowId),
         error: () => {
@@ -153,7 +153,7 @@ export class WorkflowCreateComponent implements OnInit {
         name: info.name!,
         description: info.description!,
         location: info.location!,
-        access: info.access!,
+        access: (info.access || 'PUBLIC').toUpperCase(),
       }).subscribe({
         next: (wf) => this.saveTasks(wf._id),
         error: () => {

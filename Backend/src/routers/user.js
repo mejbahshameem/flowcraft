@@ -411,6 +411,15 @@ router.post('/users/logoutAll/:token', async (req, res) => {
 	}
 });
 
+//Get current authenticated user profile
+router.get('/users/me', auth, async (req, res) => {
+	try {
+		res.status(200).send(req.user);
+	} catch (error) {
+		res.status(500).send();
+	}
+});
+
 /**
  * @swagger
  * /users/me:

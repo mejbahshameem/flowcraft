@@ -17,6 +17,10 @@ export class UserService {
     return this.http.patch(`${this.apiUrl}/users/me`, data);
   }
 
+  getMe(): Observable<User> {
+    return this.http.get<User>(`${this.apiUrl}/users/me`);
+  }
+
   uploadAvatar(file: File): Observable<string> {
     const formData = new FormData();
     formData.append('avatar', file);

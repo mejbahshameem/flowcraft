@@ -1,29 +1,51 @@
 @if (isLoggedIn()) {
   <div class="comment-form">
+    <div class="composer-avatar">
+      @if (currentUserAvatar(); as av) {
+        <img [src]="av" alt="You" />
+      } @else {
+        <span>{{ currentUserInitial() }}</span>
+      }
+    </div>
     <mat-form-field appearance="outline" class="comment-input">
       <mat-label>Write a comment</mat-label>
       <textarea matInput [(ngModel)]="newComment" rows="2"
+                maxlength="2000"
                 placeholder="Share your thoughts on this workflow..."></textarea>
     </mat-form-field>
-    <button mat-flat-button (click)="onSubmit()"
+    <button mat-flat-button color="primary" (click)="onSubmit()"
             [disabled]="submitting() || !newComment.trim()">
-      Post
+      @if (submitting()) { Posting... } @else { Post }
     </button>
   </div>
 }
 
 <div class="comments-list">
-  @for (comment of comments(); track comment._id) {
-    <div class="comment-item">
-      <div class="comment-header">
-        <span class="commenter-name">{{ comment.commenter.name }}</span>
-        @if (comment.createdAt) {
-          <span class="comment-date">{{ comment.createdAt | date:'mediumDate' }}</span>
+  @for (c of comments(); track c._id) {
+    <article class="comment-item">
+      <div class="avatar">
+        @if (c.commenter?.avatar) {
+          <img [src]="c.commenter.avatar" [alt]="c.commenter.name" />
+        } @else {
+          <span>{{ initialOf(c.commenter?.name) }}</span>
         }
       </div>
-      <p class="comment-text">{{ comment.description }}</p>
-    </div>
+      <div class="comment-body">
+        <header class="comment-header">
+          <span class="commenter-name">{{ c.commenter?.name || 'Unknown' }}</span>
+          @if (c.createdAt) {
+            <span class="comment-date" [matTooltip]="c.createdAt | date:'medium'">
+              {{ relativeTime(c.createdAt) }}
+            </span>
+          }
+        </header>
+        <p class="comment-text">{{ c.comment }}</p>
+      </div>
+    </article>
   } @empty {
-    <p class="no-comments">No comments yet. Be the first to share your thoughts.</p>
+    <div class="no-comments">
+      <mat-icon>chat_bubble_outline</mat-icon>
+      <p>No comments yet. Be the first to share your thoughts.</p>
+    </div>
   }
 </div>

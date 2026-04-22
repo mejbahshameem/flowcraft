@@ -173,17 +173,16 @@ export class WorkflowCreateComponent implements OnInit {
 
     let completed = 0;
     taskValues.forEach((t: any) => {
-      const payload = {
+      const basePayload = {
         name: t.name,
-        description: t.description,
+        description: t.description || '',
         step_no: t.step_no,
         days_required: t.days_required,
-        workflow: workflowId,
       };
 
       const obs = t._id && this.isEditMode
-        ? this.taskService.update(workflowId, t._id, payload)
-        : this.taskService.create(payload);
+        ? this.taskService.update(workflowId, t._id, basePayload)
+        : this.taskService.create({ ...basePayload, workflow: workflowId });
 
       obs.subscribe({
         next: () => {

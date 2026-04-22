@@ -21,24 +21,23 @@ const { commentType } = require('../utility/enums');
  *         application/json:
  *           schema:
  *             type: object
- *             required: [description, workflow, comment_type]
+ *             required: [comment, workflow, comment_type]
  *             properties:
- *               description: { type: string }
+ *               comment: { type: string }
  *               workflow: { type: string }
- *               comment_type: { type: string, enum: [public, private] }
+ *               comment_type: { type: string, enum: [PUBLIC, PRIVATE] }
  *     responses:
  *       201: { description: Comment posted }
  *       400: { description: Invalid comment or workflow }
  */
 //posting a comment in other workflows. Both Public and private comments supported. May have 1 and 2
-router.post('/comment/post', auth, escapehtml, async (req, res) => {
+router.post('/comment/post', auth, escapehtml, async (req, res, next) => {
 	try {
-		// for testing output	fs.writeFileSync('test.txt', req.body.workflow);
 		const wf =
 			(await WorkFlow.findById({ _id: req.body.workflow })) ||
 			(await WorkFlowInstance.findById({ _id: req.body.workflow }));
 		if (!wf) {
-			return res.status(400).send();
+			return res.status(404).json({ error: 'Workflow not found' });
 		}
 		if (
 			(req.body.comment_type === commentType.PRIVATE &&
@@ -46,21 +45,23 @@ router.post('/comment/post', auth, escapehtml, async (req, res) => {
 			(req.body.comment_type === commentType.PUBLIC &&
 				'current_step' in wf)
 		) {
-			return res.status(400).send();
+			return res.status(403).json({ error: 'Comment not allowed on this workflow' });
 		}
 
-		let comment = new Comment({
-			...req.body,
+		const comment = new Comment({
+			comment: req.body.comment,
+			workflow: req.body.workflow,
+			comment_type: req.body.comment_type,
 			commenter: req.user._id,
 		});
 
-		wf.comments = wf.comments.concat({ comment: comment._id });
+		wf.comments = (wf.comments || []).concat({ comment: comment._id });
 
 		await comment.save();
 		await wf.save();
 		res.status(201).send(comment);
 	} catch (error) {
-		res.status(500).send(error);
+		next(error);
 	}
 });
 /**
@@ -86,7 +87,7 @@ router.post('/comment/post', auth, escapehtml, async (req, res) => {
  *       200: { description: List of comments }
  *       400: { description: Workflow not found or unauthorized }
  *///get all the comments of a workflow.
-router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res) => {
+router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res, next) => {
 	const { _id, type, token } = req.params;
 
 	try {
@@ -95,14 +96,13 @@ router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res) => {
 			(await WorkFlowInstance.findById({ _id }));
 
 		if (!wf) {
-			return res.status(400).send();
+			return res.status(404).json({ error: 'Workflow not found' });
 		}
 
+		let user = null;
 		if (token) {
 			const decoded = jwt.verify(token, process.env.JWT_SECRET);
-			user = await User.findById({
-				_id: decoded._id,
-			});
+			user = await User.findById({ _id: decoded._id });
 		}
 
 		if (
@@ -113,19 +113,17 @@ router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res) => {
 					!wf.owner.equals(user._id))) ||
 			(type === commentType.PUBLIC && 'current_step' in wf)
 		) {
-			return res.status(400).send();
+			return res.status(403).json({ error: 'Not allowed to view these comments' });
 		}
 
 		const comments = await Comment.find({
 			workflow: _id,
 			comment_type: type,
-		})
-			.populate('commenter', 'name');
+		}).populate('commenter', 'name');
 
-		if (!comments) return res.status(404).send();
-		res.status(200).send(comments);
+		res.status(200).send(comments || []);
 	} catch (error) {
-		res.status(500).send();
+		next(error);
 	}
 });
 

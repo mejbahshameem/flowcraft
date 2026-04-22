@@ -18,9 +18,9 @@ export class CommentService {
     return this.http.get<Comment[]>(url);
   }
 
-  postComment(description: string, workflow: string, commentType: string): Observable<Comment> {
+  postComment(comment: string, workflow: string, commentType: string): Observable<Comment> {
     return this.http.post<Comment>(`${this.apiUrl}/comment/post`, {
-      description,
+      comment,
       workflow,
       comment_type: commentType,
     });

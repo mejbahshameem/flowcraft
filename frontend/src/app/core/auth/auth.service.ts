@@ -99,4 +99,10 @@ export class AuthService {
     this.tokenService.removeToken();
     this.currentUser.set(null);
   }
+
+  updateUser(patch: Partial<User>): void {
+    const current = this.currentUser();
+    if (!current) return;
+    this.currentUser.set({ ...current, ...patch });
+  }
 }

@@ -9,6 +9,7 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { UserService } from '../../../../core/services/user.service';
+import { AuthService } from '../../../../core/auth/auth.service';
 
 @Component({
   selector: 'app-profile',
@@ -29,6 +30,7 @@ import { UserService } from '../../../../core/services/user.service';
 export class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
+  private authService = inject(AuthService);
   private snackBar = inject(MatSnackBar);
 
   userName = signal('');
@@ -53,6 +55,7 @@ export class ProfileComponent implements OnInit {
         this.userEmail.set(user.email || '');
         this.avatarUrl.set(user.avatar || null);
         this.profileForm.patchValue({ name: user.name || '' });
+        this.authService.updateUser(user);
       },
       error: () => {
         this.snackBar.open('Could not load profile details', 'Close', { duration: 4000 });
@@ -74,6 +77,7 @@ export class ProfileComponent implements OnInit {
     this.userService.uploadAvatar(file).subscribe({
       next: (avatarDataUrl) => {
         this.avatarUrl.set(avatarDataUrl);
+        this.authService.updateUser({ avatar: avatarDataUrl });
         this.uploadingAvatar.set(false);
         this.snackBar.open('Avatar updated', 'Close', { duration: 3000 });
       },

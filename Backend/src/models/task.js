@@ -11,8 +11,8 @@ const taskSchema = new mongoose.Schema(
 
 		description: {
 			type: String,
-			required: true,
 			trim: true,
+			default: '',
 		},
 
 		days_required: {

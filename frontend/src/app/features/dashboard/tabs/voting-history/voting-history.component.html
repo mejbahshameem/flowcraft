@@ -5,28 +5,60 @@
 } @else if (history().length === 0) {
   <div class="empty-state">
     <mat-icon>how_to_vote</mat-icon>
-    <p>You have not voted on any workflows yet.</p>
+    <h3>No votes yet</h3>
+    <p>Workflows you upvote or downvote will appear here.</p>
+    <a mat-stroked-button routerLink="/search">Browse workflows</a>
   </div>
 } @else {
-  <table mat-table [dataSource]="history()" class="vote-table">
-    <ng-container matColumnDef="name">
-      <th mat-header-cell *matHeaderCellDef>Workflow</th>
-      <td mat-cell *matCellDef="let item">
-        <a class="wf-link" (click)="viewWorkflow(item._id)">{{ item.name }}</a>
-      </td>
-    </ng-container>
+  <header class="vote-toolbar">
+    <div class="summary">
+      <div class="chip up">
+        <mat-icon>thumb_up</mat-icon> {{ upCount() }} Upvoted
+      </div>
+      <div class="chip down">
+        <mat-icon>thumb_down</mat-icon> {{ downCount() }} Downvoted
+      </div>
+    </div>
+    <mat-button-toggle-group [value]="filter()" (change)="filter.set($event.value)" aria-label="Vote filter">
+      <mat-button-toggle value="ALL">All</mat-button-toggle>
+      <mat-button-toggle value="UP_VOTE">Upvoted</mat-button-toggle>
+      <mat-button-toggle value="DOWN_VOTE">Downvoted</mat-button-toggle>
+    </mat-button-toggle-group>
+  </header>
 
-    <ng-container matColumnDef="vote">
-      <th mat-header-cell *matHeaderCellDef>Your Vote</th>
-      <td mat-cell *matCellDef="let item">
-        <span class="vote-badge" [class.upvote]="item.vote === 'up_vote'" [class.downvote]="item.vote === 'down_vote'">
-          <mat-icon>{{ item.vote === 'up_vote' ? 'thumb_up' : 'thumb_down' }}</mat-icon>
-          {{ item.vote === 'up_vote' ? 'Upvoted' : 'Downvoted' }}
-        </span>
-      </td>
-    </ng-container>
-
-    <tr mat-header-row *matHeaderRowDef="displayedColumns"></tr>
-    <tr mat-row *matRowDef="let row; columns: displayedColumns;"></tr>
-  </table>
+  <div class="vote-grid">
+    @for (item of filtered(); track item._id) {
+      <article class="vote-card" [class.upvoted]="item.vote === 'UP_VOTE'" [class.downvoted]="item.vote === 'DOWN_VOTE'">
+        <div class="vote-badge">
+          <mat-icon>{{ item.vote === 'UP_VOTE' ? 'thumb_up' : 'thumb_down' }}</mat-icon>
+        </div>
+        <div class="vote-body">
+          <a class="wf-name" (click)="viewWorkflow(item._id)">{{ item.name }}</a>
+          <span class="vote-label">
+            {{ item.vote === 'UP_VOTE' ? 'You upvoted this' : 'You downvoted this' }}
+          </span>
+        </div>
+        <div class="vote-actions">
+          <button mat-stroked-button
+                  [disabled]="pending() === item._id"
+                  (click)="switchVote(item)"
+                  [matTooltip]="item.vote === 'UP_VOTE' ? 'Change to downvote' : 'Change to upvote'">
+            <mat-icon>{{ item.vote === 'UP_VOTE' ? 'thumb_down' : 'thumb_up' }}</mat-icon>
+            Switch
+          </button>
+          <button mat-icon-button
+                  [disabled]="pending() === item._id"
+                  (click)="clearVote(item)"
+                  matTooltip="Remove vote"
+                  aria-label="Remove vote">
+            <mat-icon>close</mat-icon>
+          </button>
+        </div>
+      </article>
+    } @empty {
+      <div class="empty-filter">
+        <p>No votes match the current filter.</p>
+      </div>
+    }
+  </div>
 }

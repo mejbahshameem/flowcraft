@@ -88,7 +88,7 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 | POST | /workflow/:id/vote | Yes | Vote on a workflow |
 | GET | /workflow/:id/view | No | View workflow details |
 | GET | /workflows/popular | No | Top 10 by upvotes |
-| GET | /search | No | Full text search |
+| GET | /search | No | Full text search. Query params: `interest`, `location`, `sortBy=createdAt\|up_vote`, `limit` (default 20, max 50), `skip` (default 0) |
 
 ### Tasks
 
@@ -115,7 +115,7 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
-| POST | /comment/post | Yes | Post comment |
+| POST | /comment/post | Yes | Post comment. Body: `{ comment, workflow, comment_type: "PUBLIC"\|"PRIVATE" }` |
 | GET | /workflow/:id/comments/:type/all/:token? | No | Get comments by type |
 
 ## Environment Variables

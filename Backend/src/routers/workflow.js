@@ -385,6 +385,26 @@ router.get('/workflow-instance/:_id/unfollow', auth, async (req, res) => {
  *       200: { description: Vote recorded }
  *       400: { description: Already voted or invalid vote }
  */
+//Clear the current user's vote on a workflow
+router.delete('/workflow/:_id/vote', auth, async (req, res, next) => {
+	try {
+		const wf = await WorkFlow.findById(req.params._id);
+		if (!wf) {
+			return res.status(404).json({ error: 'Workflow not found' });
+		}
+		wf.voting.up_vote = wf.voting.up_vote.filter(
+			entry => !req.user._id.equals(entry.voter)
+		);
+		wf.voting.down_vote = wf.voting.down_vote.filter(
+			entry => !req.user._id.equals(entry.voter)
+		);
+		await wf.save();
+		res.status(200).send({ success: true });
+	} catch (error) {
+		next(error);
+	}
+});
+
 //Registered user voting a workflow
 router.post('/workflow/:_id/vote', auth, escapehtml, async (req, res) => {
 	const { _id } = req.params;

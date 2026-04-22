@@ -68,4 +68,8 @@ export class WorkflowService {
       vote: vote.toUpperCase(),
     });
   }
+
+  clearVote(id: string): Observable<{ success: boolean }> {
+    return this.http.delete<{ success: boolean }>(`${this.apiUrl}/workflow/${id}/vote`);
+  }
 }

@@ -6,6 +6,9 @@
   z-index: 1000;
   background: var(--mat-sys-surface);
   border-bottom: 1px solid var(--mat-sys-outline-variant);
+  height: 64px;
+  padding: 0 16px;
+  gap: 8px;
 }
 
 .brand {
@@ -14,6 +17,12 @@
   gap: 8px;
   text-decoration: none;
   color: var(--mat-sys-primary);
+
+  mat-icon {
+    font-size: 24px;
+    width: 24px;
+    height: 24px;
+  }
 }
 
 .brand-text {
@@ -26,12 +35,72 @@
   flex: 1;
 }
 
+.nav-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.nav-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  height: 40px;
+  line-height: 40px;
+
+  mat-icon {
+    font-size: 20px;
+    width: 20px;
+    height: 20px;
+    margin: 0;
+  }
+}
+
 .nav-label {
-  margin-left: 4px;
+  font-size: 0.9rem;
+  font-weight: 500;
+}
+
+.avatar-btn {
+  all: unset;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  overflow: hidden;
+  background: var(--mat-sys-surface-container);
+  color: var(--mat-sys-on-surface);
+  margin-left: 8px;
+  transition: background 150ms ease, box-shadow 150ms ease;
+
+  img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  mat-icon {
+    font-size: 28px;
+    width: 28px;
+    height: 28px;
+  }
+
+  &:hover {
+    background: var(--mat-sys-surface-container-high);
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--mat-sys-primary);
+    outline-offset: 2px;
+  }
 }
 
 .active {
-  opacity: 1;
+  color: var(--mat-sys-primary);
 }
 
 .menu-header {
@@ -39,4 +108,8 @@
   font-weight: 500;
   border-bottom: 1px solid var(--mat-sys-outline-variant);
   margin-bottom: 4px;
+}
+
+@media (max-width: 600px) {
+  .nav-label { display: none; }
 }

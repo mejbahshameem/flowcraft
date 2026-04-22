@@ -6,24 +6,31 @@ const Task = require('../models/task');
 const WorkFlow = require('../models/workflow');
 //Create task for the workflow
 //workflow id is in req.body
-router.post('/workflow/tasks/create', auth, escapehtml, async (req, res) => {
+router.post('/workflow/tasks/create', auth, escapehtml, async (req, res, next) => {
 	try {
-		const task = new Task({ ...req.body });
-		await task.save();
-
 		const wf = await WorkFlow.findOne({
-			_id: task.workflow,
+			_id: req.body.workflow,
 			owner: req.user._id,
 		});
 		if (!wf) {
-			return res.status(400).send();
+			return res.status(404).json({ error: 'Workflow not found or not owned by user' });
 		}
+
+		const task = new Task({
+			name: req.body.name,
+			description: req.body.description || '',
+			days_required: req.body.days_required,
+			step_no: req.body.step_no,
+			workflow: wf._id,
+		});
+		await task.save();
+
 		wf.tasks = wf.tasks.concat({ task: task._id });
 		await wf.save();
 
 		res.status(201).send(task);
 	} catch (error) {
-		res.status(500).send(error);
+		next(error);
 	}
 });
 
@@ -156,24 +163,11 @@ router.patch(
 	'/workflow/:wfid/tasks/:tkid',
 	auth,
 	escapehtml,
-	async (req, res) => {
+	async (req, res, next) => {
 		const { wfid, tkid } = req.params;
 
-		const updates = Object.keys(req.body);
-
-		const allowedUpdates = [
-			'name',
-			'description',
-			'days_required',
-			'step_no',
-		];
-		const isvalidOperation = updates.every(update =>
-			allowedUpdates.includes(update)
-		);
-
-		if (!isvalidOperation) {
-			return res.status(400).send({ error: 'invalid updates!' });
-		}
+		const allowedUpdates = ['name', 'description', 'days_required', 'step_no'];
+		const updates = Object.keys(req.body).filter(k => allowedUpdates.includes(k));
 
 		try {
 			const wf = await WorkFlow.findOne({
@@ -183,7 +177,7 @@ router.patch(
 			const task = await Task.findOne({ _id: tkid });
 
 			if (!wf || !task || !task.workflow.equals(wf._id)) {
-				return res.status(400).send();
+				return res.status(404).json({ error: 'Workflow or task not found' });
 			}
 
 			updates.forEach(update => (task[update] = req.body[update]));
@@ -192,7 +186,7 @@ router.patch(
 
 			res.status(200).send(task);
 		} catch (error) {
-			res.status(500).send(error);
+			next(error);
 		}
 	}
 );
@@ -218,29 +212,25 @@ router.patch(
  *       400: { description: Workflow not found }
  */
 //delete a task in the workflow
-router.delete('/workflow/:wfid/tasks/:tkid', auth, async (req, res) => {
+router.delete('/workflow/:wfid/tasks/:tkid', auth, async (req, res, next) => {
 	try {
-		var wf = await WorkFlow.findOne({
+		const wf = await WorkFlow.findOne({
 			_id: req.params.wfid,
 			owner: req.user._id,
 		});
 
 		if (!wf) {
-			return res.status(400).send();
+			return res.status(404).json({ error: 'Workflow not found' });
 		}
 
-		const task = await Task.findOneAndDelete({
-			_id: req.params.tkid,
-		});
+		await Task.findOneAndDelete({ _id: req.params.tkid });
 
-		wf.tasks = wf.tasks.filter(
-			entry => !entry.task.equals(req.params.tkid)
-		);
+		wf.tasks = wf.tasks.filter(entry => !entry.task.equals(req.params.tkid));
 
 		await wf.save();
 		res.status(200).send({ success: true });
 	} catch (error) {
-		res.status(500).send();
+		next(error);
 	}
 });
 

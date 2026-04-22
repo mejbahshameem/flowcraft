@@ -1,12 +1,12 @@
 import { Component, OnInit, inject, signal } from '@angular/core';
-import { Router } from '@angular/router';
-import { MatTableModule } from '@angular/material/table';
+import { Router, RouterLink } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatMenuModule } from '@angular/material/menu';
 
 import { UserService } from '../../../../core/services/user.service';
 import { WorkflowService } from '../../../../core/services/workflow.service';
@@ -17,13 +17,14 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
   selector: 'app-my-workflows',
   standalone: true,
   imports: [
-    MatTableModule,
+    RouterLink,
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatDialogModule,
     MatChipsModule,
+    MatMenuModule,
   ],
   templateUrl: './my-workflows.component.html',
   styleUrl: './my-workflows.component.scss',
@@ -37,7 +38,6 @@ export class MyWorkflowsComponent implements OnInit {
 
   workflows = signal<CreatedWorkflow[]>([]);
   loading = signal(true);
-  displayedColumns = ['name', 'up_votes', 'down_votes', 'followers', 'actions'];
 
   ngOnInit(): void {
     this.loadWorkflows();

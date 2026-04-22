@@ -403,29 +403,32 @@ router.post(
  *       200: { description: List of upvoted and downvoted workflows }
  */
 // Get the voting history for a particular user
-router.get('/user/voting/history', auth, async (req, res) => {
+router.get('/user/voting/history', auth, async (req, res, next) => {
 	try {
 		const workflows_upvoted = await WorkFlow.find({
 			'voting.up_vote.voter': req.user._id,
-		});
+			deleted: false,
+		}).select('_id name');
 		const workflows_downvoted = await WorkFlow.find({
 			'voting.down_vote.voter': req.user._id,
-		});
+			deleted: false,
+		}).select('_id name');
 
-		let history_upvote = workflows_upvoted.reduce(function(acc, obj) {
-			acc.push({ _id: obj._id, name: obj.name, vote: 'UP VOTE' });
-			return acc;
-		}, []);
+		const history_upvote = workflows_upvoted.map(obj => ({
+			_id: obj._id,
+			name: obj.name,
+			vote: 'UP_VOTE',
+		}));
 
-		let history_downvote = workflows_downvoted.reduce(function(acc, obj) {
-			acc.push({ _id: obj._id, name: obj.name, vote: 'DOWN VOTE' });
-			return acc;
-		}, []);
+		const history_downvote = workflows_downvoted.map(obj => ({
+			_id: obj._id,
+			name: obj.name,
+			vote: 'DOWN_VOTE',
+		}));
 
-		history = history_upvote.concat(history_downvote);
-		res.status(200).send(history);
+		res.status(200).send(history_upvote.concat(history_downvote));
 	} catch (error) {
-		res.status(500).send();
+		next(error);
 	}
 });
 

@@ -578,31 +578,36 @@ router.get('/workflows/popular', async (req, res, next) => {
  *       200: { description: Search results }
  */
 //Get Search result
-router.get('/search', escapehtml, async (req, res) => {
-	var sortBy = 'createdAt';
-	if (req.query.sortBy === 'up_vote') {
-		sortBy = 'voting.up_vote';
-	}
+router.get('/search', escapehtml, async (req, res, next) => {
+	const sortBy = req.query.sortBy === 'up_vote' ? 'voting.up_vote' : 'createdAt';
+	const interest = (req.query.interest || '').toString().trim();
+	const location = (req.query.location || '').toString().trim();
+	const searchText = `${interest} ${location}`.trim();
+
+	const parsedLimit = parseInt(req.query.limit, 10);
+	const parsedSkip = parseInt(req.query.skip, 10);
+	const limit = Number.isFinite(parsedLimit) && parsedLimit > 0 ? Math.min(parsedLimit, 50) : 20;
+	const skip = Number.isFinite(parsedSkip) && parsedSkip >= 0 ? parsedSkip : 0;
 
 	try {
+		if (!searchText) {
+			return res.status(200).send([]);
+		}
+
 		const docs = await WorkFlow.find(
-			{
-				$text: {
-					$search: req.query.interest + ' ' + req.query.location,
-				},
-			},
+			{ $text: { $search: searchText } },
 			{ score: { $meta: 'textScore' } }
 		)
 			.where('access')
 			.ne(workflowAccess.PRIVATE)
 			.where('deleted')
-			.equals(0)
+			.equals(false)
 			.sort({ score: { $meta: 'textScore' }, [sortBy]: -1 })
-			.limit(parseInt(req.query.limit))
-			.skip(parseInt(req.query.skip));
+			.limit(limit)
+			.skip(skip);
 		res.status(200).send(docs);
 	} catch (error) {
-		res.status(500).send();
+		next(error);
 	}
 });
 

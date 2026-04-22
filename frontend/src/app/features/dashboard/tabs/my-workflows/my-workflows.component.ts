@@ -6,6 +6,7 @@ import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatChipsModule } from '@angular/material/chips';
 
 import { UserService } from '../../../../core/services/user.service';
 import { WorkflowService } from '../../../../core/services/workflow.service';
@@ -22,6 +23,7 @@ import { ConfirmDialogComponent } from '../../../../shared/components/confirm-di
     MatProgressSpinnerModule,
     MatSnackBarModule,
     MatDialogModule,
+    MatChipsModule,
   ],
   templateUrl: './my-workflows.component.html',
   styleUrl: './my-workflows.component.scss',

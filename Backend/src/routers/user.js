@@ -411,6 +411,15 @@ router.post('/users/logoutAll/:token', async (req, res) => {
 	}
 });
 
+//Get current authenticated user profile
+router.get('/users/me', auth, async (req, res) => {
+	try {
+		res.status(200).send(req.user);
+	} catch (error) {
+		res.status(500).send();
+	}
+});
+
 /**
  * @swagger
  * /users/me:
@@ -466,7 +475,7 @@ const upload = multer({
 		fileSize: 1000000,
 	},
 	fileFilter(req, file, callback) {
-		if (!file.originalname.match(/\.(jpg|jpeg|png)$/)) {
+		if (!file.originalname.match(/\.(jpg|jpeg|png)$/i)) {
 			return callback(new Error('Supported File Type: jpg,jpeg,png'));
 		}
 		callback(undefined, true);

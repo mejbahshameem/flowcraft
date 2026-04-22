@@ -51,6 +51,7 @@ export interface CreatedWorkflow {
   up_votes: number;
   down_votes: number;
   followers: number;
+  is_copy?: boolean;
 }
 
 export interface FollowedWorkflow {

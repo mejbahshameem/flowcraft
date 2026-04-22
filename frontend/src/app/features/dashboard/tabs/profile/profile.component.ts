@@ -9,7 +9,6 @@ import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 
 import { UserService } from '../../../../core/services/user.service';
-import { TokenService } from '../../../../core/auth/token.service';
 
 @Component({
   selector: 'app-profile',
@@ -30,7 +29,6 @@ import { TokenService } from '../../../../core/auth/token.service';
 export class ProfileComponent implements OnInit {
   private fb = inject(FormBuilder);
   private userService = inject(UserService);
-  private tokenService = inject(TokenService);
   private snackBar = inject(MatSnackBar);
 
   userName = signal('');
@@ -49,15 +47,17 @@ export class ProfileComponent implements OnInit {
   });
 
   ngOnInit(): void {
-    const token = this.tokenService.getToken();
-    if (token) {
-      const payload = this.tokenService.decodePayload(token);
-      if (payload) {
-        this.userName.set((payload['name'] as string) || '');
-        this.userEmail.set((payload['email'] as string) || '');
-        this.profileForm.patchValue({ name: this.userName() });
-      }
-    }
+    this.userService.getMe().subscribe({
+      next: (user) => {
+        this.userName.set(user.name || '');
+        this.userEmail.set(user.email || '');
+        this.avatarUrl.set(user.avatar || null);
+        this.profileForm.patchValue({ name: user.name || '' });
+      },
+      error: () => {
+        this.snackBar.open('Could not load profile details', 'Close', { duration: 4000 });
+      },
+    });
   }
 
   onAvatarSelected(event: Event): void {
@@ -72,7 +72,8 @@ export class ProfileComponent implements OnInit {
 
     this.uploadingAvatar.set(true);
     this.userService.uploadAvatar(file).subscribe({
-      next: () => {
+      next: (avatarDataUrl) => {
+        this.avatarUrl.set(avatarDataUrl);
         this.uploadingAvatar.set(false);
         this.snackBar.open('Avatar updated', 'Close', { duration: 3000 });
       },

@@ -5,61 +5,105 @@
 } @else if (workflows().length === 0) {
   <div class="empty-state">
     <mat-icon>bookmark_border</mat-icon>
-    <p>You are not following any workflows yet.</p>
+    <h3>Nothing saved yet</h3>
+    <p>Follow a workflow from the home page to track your progress here.</p>
+    <a mat-stroked-button routerLink="/search">Browse workflows</a>
   </div>
 } @else {
   <mat-accordion multi>
     @for (wf of workflows(); track wf.workflow_instance) {
-      <mat-expansion-panel (opened)="onPanelOpened(wf)">
-        <mat-expansion-panel-header>
-          <mat-panel-title>{{ wf.name }}</mat-panel-title>
+      <mat-expansion-panel (opened)="onPanelOpened(wf)" class="wf-panel">
+        <mat-expansion-panel-header collapsedHeight="72px" expandedHeight="72px">
+          <mat-panel-title>
+            <div class="panel-title">
+              <span class="wf-name">{{ wf.name }}</span>
+              <span class="wf-sub">
+                {{ wf.totalTasks }} {{ wf.totalTasks === 1 ? 'step' : 'steps' }} &middot; {{ wf.percentage }}% complete
+              </span>
+            </div>
+          </mat-panel-title>
           <mat-panel-description>
-            {{ wf.percentage }}% complete &middot; {{ wf.tasks }} tasks
+            <div class="progress-chip">
+              <div class="ring"
+                   [style.background]="'conic-gradient(var(--mat-sys-primary) ' + wf.percentage + '%, var(--mat-sys-surface-container) 0)'">
+                <span>{{ wf.percentage }}%</span>
+              </div>
+            </div>
           </mat-panel-description>
         </mat-expansion-panel-header>
 
-        <mat-progress-bar mode="determinate" [value]="wf.percentage" class="progress-bar"></mat-progress-bar>
-
-        @if (wf.loadingTasks) {
+        @if (wf.loadingTasks && wf.tasks.length === 0) {
           <div class="spinner-container small">
             <mat-spinner diameter="28"></mat-spinner>
           </div>
         } @else {
-          <div class="task-list">
+          <ol class="task-list">
             @for (task of wf.tasks; track task._id) {
-              <div class="task-item" [class.completed]="task.status === 'COMPLETED'">
-                <div class="task-info">
-                  <mat-icon class="task-status-icon">
-                    {{ task.status === 'COMPLETED' ? 'check_circle' : task.status === 'IN_PROGRESS' ? 'play_circle' : 'radio_button_unchecked' }}
-                  </mat-icon>
-                  <div class="task-details">
+              <li class="task-item" [class.completed]="task.status === 'COMPLETED'"
+                                    [class.active]="task.status === 'IN_PROGRESS'">
+                <div class="step-index">{{ task.step_no }}</div>
+
+                <div class="task-main">
+                  <div class="task-header-row">
                     <span class="task-name">{{ task.name }}</span>
-                    <span class="task-meta">{{ task.days_required }} day(s)</span>
+                    <span class="status-chip" [attr.data-status]="task.status">
+                      <mat-icon>
+                        {{ task.status === 'COMPLETED' ? 'check_circle' :
+                           task.status === 'IN_PROGRESS' ? 'play_circle' : 'radio_button_unchecked' }}
+                      </mat-icon>
+                      {{ statusLabel(task.status) }}
+                    </span>
+                  </div>
+
+                  @if (task.description) {
+                    <p class="task-desc">{{ task.description }}</p>
+                  }
+
+                  <div class="task-meta">
+                    <span class="meta-item">
+                      <mat-icon>schedule</mat-icon> {{ task.days_required }} day(s)
+                    </span>
+                    @if (task.timeFrame?.timelog?.end_time && task.status === 'IN_PROGRESS') {
+                      <span class="meta-item deadline">
+                        <mat-icon>event</mat-icon>
+                        Due {{ task.timeFrame?.timelog?.end_time | date:'mediumDate' }}
+                      </span>
+                    }
                   </div>
                 </div>
+
                 <div class="task-actions">
                   @if (task.status === 'NOT_STARTED') {
-                    <button mat-stroked-button (click)="startTask(wf, task)" class="compact-btn">
-                      Start
+                    <button mat-stroked-button color="primary" (click)="startTask(wf, task)">
+                      <mat-icon>play_arrow</mat-icon> Start
                     </button>
                   } @else if (task.status === 'IN_PROGRESS') {
-                    <button mat-flat-button (click)="endTask(wf, task)" class="compact-btn">
-                      Complete
+                    <button mat-flat-button color="primary" (click)="endTask(wf, task)">
+                      <mat-icon>done</mat-icon> Mark done
                     </button>
                   }
-                  <mat-slide-toggle
-                    [checked]="task.notification"
-                    (change)="toggleNotification(wf, task, $event.checked)"
-                    matTooltip="Email reminders">
-                  </mat-slide-toggle>
+
+                  @if (isActionable(task)) {
+                    <div class="reminder"
+                         matTooltip="Email me a reminder as the step deadline approaches"
+                         matTooltipPosition="left">
+                      <mat-icon>notifications</mat-icon>
+                      <mat-slide-toggle
+                        [checked]="task.notification"
+                        (change)="toggleNotification(wf, task, $event.checked)">
+                      </mat-slide-toggle>
+                    </div>
+                  }
                 </div>
-              </div>
+              </li>
             }
-          </div>
+          </ol>
         }
 
         <mat-action-row>
-          <button mat-button color="warn" (click)="unfollowWorkflow(wf)">Unfollow</button>
+          <button mat-button color="warn" (click)="unfollowWorkflow(wf)">
+            <mat-icon>bookmark_remove</mat-icon> Unfollow
+          </button>
         </mat-action-row>
       </mat-expansion-panel>
     }

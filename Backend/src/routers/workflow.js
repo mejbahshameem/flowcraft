@@ -262,23 +262,26 @@ router.post('/workflow/:_id/follow', auth, async (req, res) => {
 			owner: req.user._id,
 		});
 
-		tasks.forEach(async function(value) {
-			var task = await Task.findById(value.task);
-			var { name, description, days_required, step_no, day_type } = task;
-			var taskinstance = new TaskInstance({
-				name,
-				description,
-				days_required,
-				step_no,
-				day_type,
-				workflow_instance: wfinstance._id,
-				owner: req.user._id,
-			});
-			wfinstance.tasks = wfinstance.tasks.concat({
-				task: taskinstance._id,
-			});
-			await taskinstance.save();
+		const taskDocs = await Task.find({
+			_id: { $in: tasks.map(t => t.task) },
 		});
+
+		await Promise.all(
+			taskDocs.map(async task => {
+				const taskinstance = new TaskInstance({
+					name: task.name,
+					description: task.description || '',
+					days_required: task.days_required,
+					step_no: task.step_no,
+					workflow_instance: wfinstance._id,
+					owner: req.user._id,
+				});
+				wfinstance.tasks = wfinstance.tasks.concat({
+					task: taskinstance._id,
+				});
+				await taskinstance.save();
+			})
+		);
 
 		follower.followedworkflow = follower.followedworkflow.concat({
 			workflow: wf._id,

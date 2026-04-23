@@ -19,6 +19,18 @@
   width: 100%;
 }
 
+::ng-deep .mat-stepper-horizontal .mat-horizontal-content-container {
+  padding: 24px 4px 16px;
+}
+
+::ng-deep .mat-horizontal-stepper-content[aria-expanded="true"] {
+  overflow: visible;
+}
+
+::ng-deep .mat-horizontal-stepper-content {
+  overflow: visible;
+}
+
 .step-actions {
   display: flex;
   gap: 12px;

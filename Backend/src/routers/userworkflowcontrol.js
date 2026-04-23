@@ -24,48 +24,36 @@ const TaskNotification = require('../models/tasknotification');
 router.get(
 	'/users/me/workflowinstance/following/all',
 	auth,
-	async (req, res) => {
+	async (req, res, next) => {
 		try {
 			const user = await User.findById(req.user._id);
 
-			//return empty list for users not following any workflow yet
-			if (user.followedworkflow.length === 0) {
+			if (!user || !user.followedworkflow || user.followedworkflow.length === 0) {
 				return res.status(200).send([]);
 			}
 
-			// checking unfinished workflow
-			const workflowPromises = user.followedworkflow
-				.filter(async instance => {
-					return await WorkFlowInstance.find({
-						_id: instance.workflowinstance,
-						completed: false,
-					});
-				})
-				.map(async obj => {
-					const wfinstance = await WorkFlowInstance.findOne({
-						_id: obj.workflowinstance,
-					});
+			const instanceIds = user.followedworkflow
+				.map(entry => entry.workflowinstance)
+				.filter(Boolean);
 
-					//calculate percentage of finished tasks
+			const instances = await WorkFlowInstance.find({
+				_id: { $in: instanceIds },
+			});
+
+			const results = await Promise.all(
+				instances.map(async wfinstance => {
 					const tasks = await TaskInstance.find({
 						workflow_instance: wfinstance._id,
 					});
 
-					var completed_tasks = 0;
+					const completed = tasks.filter(
+						t => t.status === taskStatus.COMPLETED
+					).length;
 
-					tasks.forEach(task => {
-						if (task.status === taskStatus.COMPLETED) {
-							completed_tasks++;
-						}
-					});
-
-					percentage = Math.round(
-						(completed_tasks / tasks.length) * 100
-					);
-
-					if (tasks.length === 0) {
-						percentage = 0;
-					}
+					const percentage =
+						tasks.length === 0
+							? 0
+							: Math.round((completed / tasks.length) * 100);
 
 					return {
 						workflow_instance: wfinstance._id,
@@ -73,13 +61,12 @@ router.get(
 						percentage,
 						tasks: tasks.length,
 					};
-				});
-
-			Promise.all(workflowPromises).then(workflowInstances =>
-				res.status(200).send(workflowInstances)
+				})
 			);
+
+			res.status(200).send(results);
 		} catch (error) {
-			res.status(500).send();
+			next(error);
 		}
 	}
 );
@@ -370,24 +357,27 @@ router.post(
 router.post(
 	'/following/workflow/:wfid/task/:tkid/notify',
 	auth,
-	async (req, res) => {
+	async (req, res, next) => {
 		const { wfid, tkid } = req.params;
 		try {
-			const wf = await WorkFlowInstance.findById({
+			const wf = await WorkFlowInstance.findOne({
 				_id: wfid,
 				owner: req.user._id,
 			});
-			const task = await TaskInstance.findById({ _id: tkid });
+			const task = await TaskInstance.findOne({
+				_id: tkid,
+				owner: req.user._id,
+			});
 
-			if (!task || !wf || task.status === taskStatus.COMPLETED) {
-				return res.status(400).send();
+			if (!task || !wf) {
+				return res.status(404).json({ error: 'Workflow or task not found' });
 			}
 
-			task.notification = req.body.task_notification;
+			task.notification = Boolean(req.body.task_notification);
 			await task.save();
-			res.status(200).send({ success: true });
+			res.status(200).send({ success: true, notification: task.notification });
 		} catch (error) {
-			res.status(500).send();
+			next(error);
 		}
 	}
 );

@@ -9,7 +9,6 @@ import { MatInputModule } from '@angular/material/input';
 
 import { WorkflowService } from '../../core/services/workflow.service';
 import { PopularWorkflow } from '../../core/models/workflow.model';
-import { WorkflowCardComponent } from '../../shared/components/workflow-card/workflow-card.component';
 import { EmptyStateComponent } from '../../shared/components/empty-state/empty-state.component';
 
 @Component({
@@ -23,7 +22,6 @@ import { EmptyStateComponent } from '../../shared/components/empty-state/empty-s
     MatProgressSpinnerModule,
     MatFormFieldModule,
     MatInputModule,
-    WorkflowCardComponent,
     EmptyStateComponent,
   ],
   templateUrl: './home.component.html',

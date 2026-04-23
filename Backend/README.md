@@ -80,7 +80,7 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | /workflow/create | Yes | Create workflow |
-| POST | /workflow/:id/copy | Yes | Copy workflow for editing |
+| POST | /workflow/:id/copy | Yes | Copy workflow into the caller's account as a private draft |
 | PATCH | /workflow/:id/edit | Yes | Edit workflow info |
 | DELETE | /workflow/:id/delete | Yes | Soft delete workflow |
 | POST | /workflow/:id/follow | Yes | Follow a workflow |

@@ -11,7 +11,7 @@
       <mat-label>Write a comment</mat-label>
       <textarea matInput [(ngModel)]="newComment" rows="2"
                 maxlength="2000"
-                placeholder="Share your thoughts on this workflow..."></textarea>
+                placeholder="Share feedback, ask a question or add useful context for other followers"></textarea>
     </mat-form-field>
     <button mat-flat-button color="primary" (click)="onSubmit()"
             [disabled]="submitting() || !newComment.trim()">

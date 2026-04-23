@@ -1,16 +1,11 @@
 <mat-card class="workflow-card" [routerLink]="['/workflow', id()]">
   <mat-card-content>
-    <header class="card-top">
-      <div class="owner-badge" [matTooltip]="ownerName() || 'Unknown author'">
-        <span>{{ ownerInitial() }}</span>
-      </div>
-      <div class="heading">
-        <h3 class="name">{{ name() }}</h3>
-        @if (ownerName()) {
-          <span class="by">by {{ ownerName() }}</span>
-        }
-      </div>
-    </header>
+    <h3 class="name">{{ name() }}</h3>
+    @if (ownerName()) {
+      <span class="by">by {{ ownerName() }}</span>
+    } @else {
+      <span class="by muted">by Unknown author</span>
+    }
 
     @if (description()) {
       <p class="description">{{ description() }}</p>

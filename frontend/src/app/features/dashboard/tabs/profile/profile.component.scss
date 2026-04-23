@@ -54,15 +54,23 @@
 
 .settings-card {
   mat-card-content {
-    padding: 16px 16px 0;
+    padding: 20px 20px 24px;
   }
 
   form {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
-    gap: 8px;
+    gap: 12px;
   }
+
+  button[type="submit"] {
+    margin-top: 4px;
+  }
+}
+
+.profile-container > mat-card + mat-card {
+  margin-top: 0;
 }
 
 .full-width {

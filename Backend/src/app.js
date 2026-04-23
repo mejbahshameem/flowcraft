@@ -21,7 +21,26 @@ const allowedOrigins = process.env.CORS_ORIGIN
 	? process.env.CORS_ORIGIN.split(',')
 	: ['http://localhost:4200'];
 
-app.use(helmet());
+app.use(
+	helmet({
+		contentSecurityPolicy: {
+			useDefaults: true,
+			directives: {
+				defaultSrc: ["'self'"],
+				scriptSrc: ["'self'"],
+				styleSrc: ["'self'", "'unsafe-inline'"],
+				imgSrc: ["'self'", 'data:', 'blob:'],
+				fontSrc: ["'self'", 'data:'],
+				connectSrc: ["'self'"],
+				frameAncestors: ["'none'"],
+				objectSrc: ["'none'"],
+				upgradeInsecureRequests: [],
+			},
+		},
+		crossOriginResourcePolicy: { policy: 'cross-origin' },
+		referrerPolicy: { policy: 'no-referrer' },
+	})
+);
 app.use(cors({
 	origin: allowedOrigins,
 	methods: ['GET', 'POST', 'PATCH', 'DELETE', 'OPTIONS'],

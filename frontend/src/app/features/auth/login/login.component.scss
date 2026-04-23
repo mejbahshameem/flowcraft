@@ -19,6 +19,33 @@
     font-size: 1rem;
   }
 
+  .activation-notice {
+    margin-top: 20px;
+    padding: 16px;
+    border-radius: 12px;
+    background: var(--mat-sys-secondary-container);
+    color: var(--mat-sys-on-secondary-container);
+    display: flex;
+    gap: 12px;
+    align-items: flex-start;
+
+    mat-icon {
+      font-size: 24px;
+      width: 24px;
+      height: 24px;
+    }
+
+    p {
+      margin: 0 0 4px;
+      font-size: 0.9rem;
+    }
+
+    .muted {
+      color: color-mix(in srgb, var(--mat-sys-on-secondary-container) 80%, transparent);
+      margin-bottom: 10px;
+    }
+  }
+
   .auth-links {
     margin-top: 24px;
     display: flex;

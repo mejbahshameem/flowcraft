@@ -357,24 +357,27 @@ router.post(
 router.post(
 	'/following/workflow/:wfid/task/:tkid/notify',
 	auth,
-	async (req, res) => {
+	async (req, res, next) => {
 		const { wfid, tkid } = req.params;
 		try {
-			const wf = await WorkFlowInstance.findById({
+			const wf = await WorkFlowInstance.findOne({
 				_id: wfid,
 				owner: req.user._id,
 			});
-			const task = await TaskInstance.findById({ _id: tkid });
+			const task = await TaskInstance.findOne({
+				_id: tkid,
+				owner: req.user._id,
+			});
 
-			if (!task || !wf || task.status === taskStatus.COMPLETED) {
-				return res.status(400).send();
+			if (!task || !wf) {
+				return res.status(404).json({ error: 'Workflow or task not found' });
 			}
 
-			task.notification = req.body.task_notification;
+			task.notification = Boolean(req.body.task_notification);
 			await task.save();
-			res.status(200).send({ success: true });
+			res.status(200).send({ success: true, notification: task.notification });
 		} catch (error) {
-			res.status(500).send();
+			next(error);
 		}
 	}
 );

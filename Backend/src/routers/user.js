@@ -352,7 +352,52 @@ router.post('/users/login', authLimiter, escapehtml, async (req, res) => {
 		const { name, avatar } = user;
 		res.status(200).send({ user: { name, avatar }, token });
 	} catch (error) {
-		res.status(400).send(error.message);
+		if (error.code === 'NOT_ACTIVATED') {
+			return res.status(403).json({
+				error: 'Please activate your account first',
+				code: 'NOT_ACTIVATED',
+				email: error.email,
+				resendUrl: '/api/v1/users/activation/resend',
+			});
+		}
+		res.status(400).json({ error: error.message });
+	}
+});
+
+/**
+ * @swagger
+ * /users/activation/resend:
+ *   post:
+ *     summary: Resend the activation email for an inactive account
+ *     tags: [Users]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [email]
+ *             properties:
+ *               email: { type: string, format: email }
+ *     responses:
+ *       200: { description: Activation email sent if the account is pending }
+ */
+router.post('/users/activation/resend', authLimiter, escapehtml, async (req, res, next) => {
+	try {
+		const email = (req.body.email || '').toString().trim().toLowerCase();
+		if (!email) {
+			return res.status(400).json({ error: 'Email is required' });
+		}
+
+		const user = await User.findOne({ email });
+		if (user && user.account_status === useraccountStatus.NOT_ACTIVATED) {
+			const activationToken = await user.generateAccountToken();
+			sendActivationToken(user.name, user.email, activationToken);
+		}
+
+		res.status(200).json({ success: true });
+	} catch (error) {
+		next(error);
 	}
 });
 

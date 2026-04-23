@@ -130,7 +130,10 @@ userSchema.statics.findbyCredentials = async (email, password) => {
 	}
 
 	if (user.account_status === useraccountStatus.NOT_ACTIVATED) {
-		throw new Error('Please activate your account');
+		const err = new Error('Account not activated');
+		err.code = 'NOT_ACTIVATED';
+		err.email = user.email;
+		throw err;
 	}
 
 	if (user.account_status === useraccountStatus.DELETED) {

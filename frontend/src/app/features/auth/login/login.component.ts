@@ -34,6 +34,8 @@ export class LoginComponent {
 
   hidePassword = signal(true);
   loading = signal(false);
+  pendingActivationEmail = signal<string | null>(null);
+  resending = signal(false);
 
   loginForm = this.fb.group({
     email: ['', [Validators.required, Validators.email]],
@@ -44,6 +46,7 @@ export class LoginComponent {
     if (this.loginForm.invalid) return;
 
     this.loading.set(true);
+    this.pendingActivationEmail.set(null);
     const { email, password } = this.loginForm.getRawValue();
 
     this.authService.login(email!, password!).subscribe({
@@ -53,8 +56,32 @@ export class LoginComponent {
       },
       error: (err) => {
         this.loading.set(false);
+        if (err.status === 403 && err.error?.code === 'NOT_ACTIVATED') {
+          this.pendingActivationEmail.set(err.error.email || email || null);
+          return;
+        }
         const message = err.error?.error || 'Login failed. Please check your credentials.';
         this.snackBar.open(message, 'Close', { duration: 5000 });
+      },
+    });
+  }
+
+  resendActivation(): void {
+    const email = this.pendingActivationEmail();
+    if (!email) return;
+    this.resending.set(true);
+    this.authService.resendActivation(email).subscribe({
+      next: () => {
+        this.resending.set(false);
+        this.snackBar.open(
+          'Activation email sent. Check your inbox.',
+          'Close',
+          { duration: 5000 }
+        );
+      },
+      error: () => {
+        this.resending.set(false);
+        this.snackBar.open('Could not send activation email', 'Close', { duration: 4000 });
       },
     });
   }

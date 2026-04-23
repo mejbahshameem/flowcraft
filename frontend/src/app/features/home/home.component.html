@@ -43,9 +43,12 @@
 
 <section class="popular-section">
   <div class="section-header">
-    <h2>Popular Workflows</h2>
+    <div>
+      <h2>Top Ranked Workflows</h2>
+      <p class="section-sub">Curated by community votes and followers</p>
+    </div>
     <a mat-button routerLink="/search" color="primary">
-      View All
+      Browse all
       <mat-icon>arrow_forward</mat-icon>
     </a>
   </div>
@@ -67,10 +70,56 @@
       message="Be the first to create a workflow and share it with the community."
     />
   } @else {
-    <div class="workflow-grid">
-      @for (workflow of popularWorkflows(); track workflow.workflow) {
-        <app-workflow-card [workflow]="workflow" />
-      }
-    </div>
+    <article class="featured-card" [routerLink]="['/workflow', popularWorkflows()[0].workflow]">
+      <div class="rank-medal gold">#1</div>
+      <div class="featured-body">
+        <span class="featured-tag">Top pick</span>
+        <h3>{{ popularWorkflows()[0].name }}</h3>
+        @if (popularWorkflows()[0].owner?.name) {
+          <span class="author">by {{ popularWorkflows()[0].owner?.name }}</span>
+        }
+        @if (popularWorkflows()[0].description) {
+          <p class="featured-desc">{{ popularWorkflows()[0].description }}</p>
+        }
+        <div class="featured-meta">
+          @if (popularWorkflows()[0].location) {
+            <span><mat-icon>location_on</mat-icon> {{ popularWorkflows()[0].location }}</span>
+          }
+          @if (popularWorkflows()[0].tasks) {
+            <span><mat-icon>checklist</mat-icon> {{ popularWorkflows()[0].tasks }} steps</span>
+          }
+          <span><mat-icon>thumb_up</mat-icon> {{ popularWorkflows()[0].upvotes }}</span>
+          <span><mat-icon>group</mat-icon> {{ popularWorkflows()[0].followers ?? 0 }} following</span>
+        </div>
+      </div>
+    </article>
+
+    @if (popularWorkflows().length > 1) {
+      <ol class="rank-list">
+        @for (wf of popularWorkflows().slice(1); track wf.workflow; let i = $index) {
+          <li class="rank-row" [routerLink]="['/workflow', wf.workflow]">
+            <div class="rank-medal"
+                 [class.silver]="i === 0"
+                 [class.bronze]="i === 1">#{{ i + 2 }}</div>
+            <div class="rank-main">
+              <div class="rank-title">{{ wf.name }}</div>
+              @if (wf.owner?.name) {
+                <span class="rank-author">by {{ wf.owner?.name }}</span>
+              }
+              @if (wf.description) {
+                <p class="rank-desc">{{ wf.description }}</p>
+              }
+            </div>
+            <div class="rank-stats">
+              <span class="rank-stat"><mat-icon>thumb_up</mat-icon> {{ wf.upvotes }}</span>
+              <span class="rank-stat"><mat-icon>group</mat-icon> {{ wf.followers ?? 0 }}</span>
+              @if (wf.tasks) {
+                <span class="rank-stat muted"><mat-icon>checklist</mat-icon> {{ wf.tasks }} steps</span>
+              }
+            </div>
+          </li>
+        }
+      </ol>
+    }
   }
 </section>

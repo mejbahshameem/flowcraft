@@ -11,7 +11,7 @@
         <form [formGroup]="infoForm">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Workflow Name</mat-label>
-            <input matInput formControlName="name" placeholder="e.g. Study in Germany" />
+            <input matInput formControlName="name" placeholder="Masters in Computer Science in Germany" />
             @if (infoForm.controls.name.hasError('required')) {
               <mat-error>Name is required</mat-error>
             }
@@ -20,7 +20,7 @@
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Description</mat-label>
             <textarea matInput formControlName="description" rows="4"
-                      placeholder="Describe what this workflow covers and who it helps..."></textarea>
+                      placeholder="A step by step guide for international students applying to Masters programs in Germany, covering university shortlisting, language tests, visa application and enrolment."></textarea>
             @if (infoForm.controls.description.hasError('required')) {
               <mat-error>Description is required</mat-error>
             }
@@ -28,7 +28,7 @@
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Location</mat-label>
-            <input matInput formControlName="location" placeholder="e.g. Germany, Berlin" />
+            <input matInput formControlName="location" placeholder="Berlin, Germany" />
           </mat-form-field>
 
           <mat-form-field appearance="outline">

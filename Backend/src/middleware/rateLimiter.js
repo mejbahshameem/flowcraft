@@ -16,4 +16,12 @@ const generalLimiter = rateLimit({
 	legacyHeaders: false,
 });
 
-module.exports = { authLimiter, generalLimiter };
+const commentLimiter = rateLimit({
+	windowMs: 10 * 60 * 1000,
+	max: 30,
+	message: { error: 'Too many comments, please slow down' },
+	standardHeaders: true,
+	legacyHeaders: false,
+});
+
+module.exports = { authLimiter, generalLimiter, commentLimiter };

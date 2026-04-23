@@ -43,9 +43,9 @@ src/
 
 | Feature | Implementation |
 |---------|---------------|
-| Helmet | HTTP security headers (XSS, clickjacking, MIME sniffing protection) |
+| Helmet | HTTP security headers with a strict Content Security Policy (data and blob image sources allowed for avatars) |
 | CORS | Allowlist based origin control via `CORS_ORIGIN` env var |
-| Rate Limiting | 20 requests per 15 minutes on auth endpoints |
+| Rate Limiting | 20 requests per 15 minutes on auth endpoints, 30 comments per 10 minutes per IP |
 | Mongo Sanitize | Prevents NoSQL injection by stripping `$` operators from input |
 | Body Size Limit | 10KB max JSON payload to prevent DoS |
 | Password Hashing | bcrypt with 12 salt rounds |
@@ -62,7 +62,8 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 | Method | Path | Auth | Description |
 |--------|------|------|-------------|
 | POST | /users/create | No | Register new account |
-| POST | /users/login | No | Authenticate and get token |
+| POST | /users/login | No | Authenticate and get token. Returns 403 with `code: "NOT_ACTIVATED"` when the account is pending activation |
+| POST | /users/activation/resend | No | Resend the activation email for an inactive account |
 | POST | /users/logout | Yes | Logout current session |
 | POST | /users/logoutAll/:token | No | Logout all sessions |
 | GET | /user/:token | No | Activate account by token |

@@ -14,6 +14,7 @@ const commentSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			trim: true,
+			maxlength: [2000, 'Comment must be 2000 characters or less'],
 		},
 
 		workflow: {

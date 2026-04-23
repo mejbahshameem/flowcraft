@@ -11,24 +11,40 @@
         <form [formGroup]="infoForm">
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Workflow Name</mat-label>
-            <input matInput formControlName="name" placeholder="Masters in Computer Science in Germany" />
+            <input matInput formControlName="name" placeholder="Masters in Computer Science in Germany" maxlength="120" />
+            <mat-hint align="end">
+              {{ infoForm.controls.name.value?.length || 0 }} / 120
+            </mat-hint>
             @if (infoForm.controls.name.hasError('required')) {
               <mat-error>Name is required</mat-error>
+            }
+            @if (infoForm.controls.name.hasError('maxlength')) {
+              <mat-error>Name must be 120 characters or less</mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Description</mat-label>
             <textarea matInput formControlName="description" rows="4"
+                      maxlength="4000"
                       placeholder="A step by step guide for international students applying to Masters programs in Germany, covering university shortlisting, language tests, visa application and enrolment."></textarea>
+            <mat-hint align="end">
+              {{ infoForm.controls.description.value?.length || 0 }} / 4000
+            </mat-hint>
             @if (infoForm.controls.description.hasError('required')) {
               <mat-error>Description is required</mat-error>
+            }
+            @if (infoForm.controls.description.hasError('maxlength')) {
+              <mat-error>Description must be 4000 characters or less</mat-error>
             }
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
             <mat-label>Location</mat-label>
-            <input matInput formControlName="location" placeholder="Berlin, Germany" />
+            <input matInput formControlName="location" placeholder="Berlin, Germany" maxlength="160" />
+            @if (infoForm.controls.location.hasError('maxlength')) {
+              <mat-error>Location must be 160 characters or less</mat-error>
+            }
           </mat-form-field>
 
           <mat-form-field appearance="outline">
@@ -59,7 +75,10 @@
                 <div class="task-fields">
                   <mat-form-field appearance="outline" class="task-name">
                     <mat-label>Task Name</mat-label>
-                    <input matInput formControlName="name" />
+                    <input matInput formControlName="name" maxlength="160" />
+                    @if (task.get('name')?.hasError('maxlength')) {
+                      <mat-error>Name must be 160 characters or less</mat-error>
+                    }
                   </mat-form-field>
                   <mat-form-field appearance="outline" class="task-days">
                     <mat-label>Days</mat-label>
@@ -68,7 +87,13 @@
                 </div>
                 <mat-form-field appearance="outline" class="full-width">
                   <mat-label>Description</mat-label>
-                  <textarea matInput formControlName="description" rows="2"></textarea>
+                  <textarea matInput formControlName="description" rows="2" maxlength="2000"></textarea>
+                  <mat-hint align="end">
+                    {{ task.get('description')?.value?.length || 0 }} / 2000
+                  </mat-hint>
+                  @if (task.get('description')?.hasError('maxlength')) {
+                    <mat-error>Description must be 2000 characters or less</mat-error>
+                  }
                 </mat-form-field>
                 <mat-divider></mat-divider>
               </div>

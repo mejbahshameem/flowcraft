@@ -7,6 +7,7 @@ const WorkFlowInstance = require('../models/workflowinstance');
 const User = require('../models/user');
 const Comment = require('../models/comment');
 const jwt = require('jsonwebtoken');
+const { commentLimiter } = require('../middleware/rateLimiter');
 const { commentType } = require('../utility/enums');
 /**
  * @swagger
@@ -31,7 +32,7 @@ const { commentType } = require('../utility/enums');
  *       400: { description: Invalid comment or workflow }
  */
 //posting a comment in other workflows. Both Public and private comments supported. May have 1 and 2
-router.post('/comment/post', auth, escapehtml, async (req, res, next) => {
+router.post('/comment/post', auth, commentLimiter, escapehtml, async (req, res, next) => {
 	try {
 		const wf =
 			(await WorkFlow.findById({ _id: req.body.workflow })) ||

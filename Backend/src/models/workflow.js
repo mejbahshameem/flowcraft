@@ -7,12 +7,14 @@ const workFlowSchema = new mongoose.Schema(
 			type: String,
 			required: true,
 			trim: true,
+			maxlength: [120, 'Workflow name must be 120 characters or less'],
 		},
 
 		description: {
 			type: String,
 			required: true,
 			trim: true,
+			maxlength: [4000, 'Workflow description must be 4000 characters or less'],
 		},
 
 		access: {
@@ -24,6 +26,7 @@ const workFlowSchema = new mongoose.Schema(
 		location: {
 			type: String,
 			trim: true,
+			maxlength: [160, 'Location must be 160 characters or less'],
 		},
 
 		voting: {

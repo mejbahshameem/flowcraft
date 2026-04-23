@@ -47,8 +47,8 @@ export class WorkflowCreateComponent implements OnInit {
 
   infoForm = this.fb.group({
     name: ['', [Validators.required, Validators.maxLength(120)]],
-    description: ['', [Validators.required, Validators.maxLength(500)]],
-    location: ['', [Validators.required, Validators.maxLength(100)]],
+    description: ['', [Validators.required, Validators.maxLength(4000)]],
+    location: ['', [Validators.required, Validators.maxLength(160)]],
     access: ['PUBLIC'],
   });
 
@@ -84,8 +84,8 @@ export class WorkflowCreateComponent implements OnInit {
           .forEach(t => {
             this.tasks.push(this.fb.group({
               _id: [t._id],
-              name: [t.name, Validators.required],
-              description: [t.description],
+              name: [t.name, [Validators.required, Validators.maxLength(160)]],
+              description: [t.description, [Validators.maxLength(2000)]],
               step_no: [t.step_no, [Validators.required, Validators.min(1)]],
               days_required: [t.days_required, [Validators.required, Validators.min(1)]],
             }));
@@ -103,8 +103,8 @@ export class WorkflowCreateComponent implements OnInit {
   addTask(): void {
     this.tasks.push(this.fb.group({
       _id: [''],
-      name: ['', Validators.required],
-      description: [''],
+      name: ['', [Validators.required, Validators.maxLength(160)]],
+      description: ['', [Validators.maxLength(2000)]],
       step_no: [this.tasks.length + 1, [Validators.required, Validators.min(1)]],
       days_required: [1, [Validators.required, Validators.min(1)]],
     }));

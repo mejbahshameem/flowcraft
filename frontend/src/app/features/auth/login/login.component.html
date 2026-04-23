@@ -41,6 +41,21 @@
     </button>
   </form>
 
+  @if (pendingActivationEmail(); as email) {
+    <div class="activation-notice">
+      <mat-icon>mark_email_unread</mat-icon>
+      <div>
+        <p>Your account is not activated yet.</p>
+        <p class="muted">We can send a new activation link to <strong>{{ email }}</strong>.</p>
+        <button mat-stroked-button color="primary" type="button"
+                [disabled]="resending()"
+                (click)="resendActivation()">
+          @if (resending()) { Sending... } @else { Resend activation email }
+        </button>
+      </div>
+    </div>
+  }
+
   <div class="auth-links">
     <a routerLink="/forgot-password">Forgot password?</a>
     <span>

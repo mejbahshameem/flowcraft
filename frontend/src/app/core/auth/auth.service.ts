@@ -70,6 +70,12 @@ export class AuthService {
     });
   }
 
+  resendActivation(email: string) {
+    return this.http.post<MessageResponse>(`${this.apiUrl}/users/activation/resend`, {
+      email,
+    });
+  }
+
   resetPassword(token: string, password: string) {
     return this.http.post<MessageResponse>(`${this.apiUrl}/user/account/reset/password`, {
       token,

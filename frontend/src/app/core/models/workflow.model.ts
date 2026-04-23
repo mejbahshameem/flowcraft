@@ -42,7 +42,14 @@ export interface WorkflowWithTasks {
 export interface PopularWorkflow {
   workflow: string;
   name: string;
+  description?: string;
+  location?: string;
+  owner?: { _id: string; name: string } | null;
   upvotes: number;
+  downvotes?: number;
+  followers?: number;
+  tasks?: number;
+  updatedAt?: string;
 }
 
 export interface CreatedWorkflow {

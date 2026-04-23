@@ -1,25 +1,58 @@
-<mat-card class="workflow-card" [routerLink]="['/workflow', getId()]">
-  <mat-card-header>
-    <mat-card-title>{{ getName() }}</mat-card-title>
-    @if (getOwnerName()) {
-      <mat-card-subtitle>by {{ getOwnerName() }}</mat-card-subtitle>
-    }
-  </mat-card-header>
+<mat-card class="workflow-card" [routerLink]="['/workflow', id()]">
   <mat-card-content>
-    @if (getDescription()) {
-      <p class="description">{{ getDescription() }}</p>
+    <header class="card-top">
+      <div class="owner-badge" [matTooltip]="ownerName() || 'Unknown author'">
+        <span>{{ ownerInitial() }}</span>
+      </div>
+      <div class="heading">
+        <h3 class="name">{{ name() }}</h3>
+        @if (ownerName()) {
+          <span class="by">by {{ ownerName() }}</span>
+        }
+      </div>
+    </header>
+
+    @if (description()) {
+      <p class="description">{{ description() }}</p>
     }
-    @if (getLocation()) {
-      <div class="location">
-        <mat-icon>location_on</mat-icon>
-        <span>{{ getLocation() }}</span>
+
+    <div class="meta-row">
+      @if (location()) {
+        <span class="meta">
+          <mat-icon>location_on</mat-icon> {{ location() }}
+        </span>
+      }
+      @if (tasks()) {
+        <span class="meta">
+          <mat-icon>checklist</mat-icon> {{ tasks() }} steps
+        </span>
+      }
+      @if (updatedLabel()) {
+        <span class="meta">
+          <mat-icon>schedule</mat-icon> {{ updatedLabel() }}
+        </span>
+      }
+    </div>
+  </mat-card-content>
+
+  <footer class="card-footer">
+    <div class="stat" matTooltip="Upvotes">
+      <mat-icon class="up">thumb_up</mat-icon>
+      <span>{{ upvotes() }}</span>
+    </div>
+    <div class="stat" matTooltip="Downvotes">
+      <mat-icon class="down">thumb_down</mat-icon>
+      <span>{{ downvotes() }}</span>
+    </div>
+    <div class="stat" matTooltip="Followers">
+      <mat-icon class="followers">group</mat-icon>
+      <span>{{ followers() }}</span>
+    </div>
+    @if (score() !== null) {
+      <div class="score" [matTooltip]="score() + '% positive'">
+        <mat-icon>trending_up</mat-icon>
+        <span>{{ score() }}%</span>
       </div>
     }
-  </mat-card-content>
-  <mat-card-actions align="end">
-    <div class="vote-display">
-      <mat-icon>thumb_up</mat-icon>
-      <span>{{ getUpvotes() }}</span>
-    </div>
-  </mat-card-actions>
+  </footer>
 </mat-card>

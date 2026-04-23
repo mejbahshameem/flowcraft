@@ -77,6 +77,7 @@ router.post('/workflow/:_id/copy', auth, async (req, res) => {
 			name: wf.name,
 			description: wf.description,
 			location: wf.location,
+			access: workflowAccess.PRIVATE,
 			owner: req.user._id,
 			source_workflow: wf._id,
 		});
@@ -553,17 +554,29 @@ router.get('/workflow/:_id/view', async (req, res) => {
 //popular workflow by the #of upvotes
 router.get('/workflows/popular', async (req, res, next) => {
 	try {
-		const workflows = await WorkFlow.find({ deleted: false }).select(
-			'_id name voting'
-		);
+		const workflows = await WorkFlow.find({
+			deleted: false,
+			access: workflowAccess.PUBLIC,
+		})
+			.select('_id name description location voting followers tasks owner updatedAt')
+			.populate('owner', 'name');
 
 		const popular = workflows
 			.map(workflow => ({
 				workflow: workflow._id,
 				name: workflow.name,
+				description: workflow.description,
+				location: workflow.location,
+				owner: workflow.owner
+					? { _id: workflow.owner._id, name: workflow.owner.name }
+					: null,
 				upvotes: workflow.voting?.up_vote?.length || 0,
+				downvotes: workflow.voting?.down_vote?.length || 0,
+				followers: workflow.followers?.length || 0,
+				tasks: workflow.tasks?.length || 0,
+				updatedAt: workflow.updatedAt,
 			}))
-			.sort((a, b) => b.upvotes - a.upvotes)
+			.sort((a, b) => b.upvotes - a.upvotes || b.followers - a.followers)
 			.slice(0, 10);
 
 		res.status(200).send(popular);

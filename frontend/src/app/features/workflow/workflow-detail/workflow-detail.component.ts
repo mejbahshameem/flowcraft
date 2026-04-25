@@ -1,4 +1,4 @@
-import { Component, OnInit, signal, inject } from '@angular/core';
+import { Component, OnInit, signal, computed, inject } from '@angular/core';
 import { ActivatedRoute, Router } from '@angular/router';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
@@ -6,7 +6,6 @@ import { MatChipsModule } from '@angular/material/chips';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
 import { MatExpansionModule } from '@angular/material/expansion';
 import { MatSnackBar, MatSnackBarModule } from '@angular/material/snack-bar';
-import { MatDividerModule } from '@angular/material/divider';
 
 import { WorkflowService } from '../../../core/services/workflow.service';
 import { AuthService } from '../../../core/auth/auth.service';
@@ -24,7 +23,6 @@ import { CommentSectionComponent } from './comment-section.component';
     MatProgressSpinnerModule,
     MatExpansionModule,
     MatSnackBarModule,
-    MatDividerModule,
     VoteButtonsComponent,
     CommentSectionComponent,
   ],
@@ -43,6 +41,9 @@ export class WorkflowDetailComponent implements OnInit {
   workflowId = '';
   isLoggedIn = this.authService.isAuthenticated;
   followLoading = signal(false);
+  totalDays = computed(() =>
+    (this.workflow()?.tasks ?? []).reduce((sum, t) => sum + (t.days_required || 0), 0),
+  );
 
   ngOnInit(): void {
     this.workflowId = this.route.snapshot.paramMap.get('id') || '';

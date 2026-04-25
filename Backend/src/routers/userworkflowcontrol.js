@@ -4,10 +4,68 @@ const auth = require('../middleware/auth');
 const User = require('../models/user');
 const WorkFlow = require('../models/workflow');
 const WorkFlowInstance = require('../models/workflowinstance');
+const Task = require('../models/task');
 const TaskInstance = require('../models/taskinstance');
 const { taskStatus } = require('../utility/enums');
 const moment = require('moment');
 const TaskNotification = require('../models/tasknotification');
+
+const syncWorkflowInstanceTasks = async (user, workflowInstanceId) => {
+	if (!user || !user.followedworkflow || user.followedworkflow.length === 0) {
+		return;
+	}
+
+	const relation = user.followedworkflow.find(entry =>
+		entry.workflowinstance.equals(workflowInstanceId)
+	);
+
+	if (!relation) {
+		return;
+	}
+
+	const sourceTasks = await Task.find({ workflow: relation.workflow }).sort({
+		step_no: 1,
+	});
+	if (sourceTasks.length === 0) {
+		return;
+	}
+
+	const existingTasks = await TaskInstance.find({
+		workflow_instance: workflowInstanceId,
+	}).select('step_no name');
+	const existingKeys = new Set(
+		existingTasks.map(task => `${task.step_no}:${task.name}`)
+	);
+	const missingTasks = sourceTasks.filter(
+		task => !existingKeys.has(`${task.step_no}:${task.name}`)
+	);
+
+	if (missingTasks.length === 0) {
+		return;
+	}
+
+	const createdTaskInstances = await TaskInstance.insertMany(
+		missingTasks.map(task => ({
+			name: task.name,
+			description: task.description || '',
+			days_required: task.days_required,
+			step_no: task.step_no,
+			workflow_instance: workflowInstanceId,
+			owner: user._id,
+		}))
+	);
+
+	await WorkFlowInstance.updateOne(
+		{ _id: workflowInstanceId, owner: user._id },
+		{
+			$push: {
+				tasks: {
+					$each: createdTaskInstances.map(task => ({ task: task._id })),
+				},
+			},
+		}
+	);
+};
 
 /**
  * @swagger
@@ -39,32 +97,48 @@ router.get(
 			const instances = await WorkFlowInstance.find({
 				_id: { $in: instanceIds },
 			});
+			const instanceLookup = new Map(
+				instances.map(instance => [instance._id.toString(), instance])
+			);
 
 			const results = await Promise.all(
-				instances.map(async wfinstance => {
-					const tasks = await TaskInstance.find({
-						workflow_instance: wfinstance._id,
-					});
+				user.followedworkflow.map(async relation => {
+					if (!relation.workflowinstance || !relation.workflow) {
+						return null;
+					}
 
-					const completed = tasks.filter(
+					const instance = instanceLookup.get(
+						relation.workflowinstance.toString()
+					);
+					if (!instance) {
+						return null;
+					}
+
+					await syncWorkflowInstanceTasks(user, instance._id);
+
+					const [taskInstances, totalTasks] = await Promise.all([
+						TaskInstance.find({
+							workflow_instance: instance._id,
+						}),
+						Task.countDocuments({ workflow: relation.workflow }),
+					]);
+
+					const completed = taskInstances.filter(
 						t => t.status === taskStatus.COMPLETED
 					).length;
-
 					const percentage =
-						tasks.length === 0
-							? 0
-							: Math.round((completed / tasks.length) * 100);
+						totalTasks === 0 ? 0 : Math.round((completed / totalTasks) * 100);
 
 					return {
-						workflow_instance: wfinstance._id,
-						name: wfinstance.name,
+						workflow_instance: instance._id,
+						name: instance.name,
 						percentage,
-						tasks: tasks.length,
+						tasks: totalTasks,
 					};
 				})
 			);
 
-			res.status(200).send(results);
+			res.status(200).send(results.filter(Boolean));
 		} catch (error) {
 			next(error);
 		}
@@ -137,12 +211,17 @@ router.get('/following/workflow/:_id/tasks/all', auth, async (req, res) => {
 			_id,
 			owner: req.user._id,
 		});
-		const tasks = await TaskInstance.find({ workflow_instance: _id });
 
-		if (!tasks || !wf) {
+		if (!wf) {
 			return res.status(400).send();
 		}
-		tasks.push({ current_step_workflow: wf.current_step });
+
+		await syncWorkflowInstanceTasks(req.user, wf._id);
+
+		const tasks = await TaskInstance.find({ workflow_instance: _id }).sort({
+			step_no: 1,
+		});
+
 		res.send(tasks);
 	} catch (error) {
 		res.status(500).send();

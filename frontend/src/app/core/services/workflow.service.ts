@@ -32,9 +32,10 @@ export class WorkflowService {
         location: r.location,
         access: r.access,
         owner: r.owner,
-        upvotes: r.voting?.up_vote?.length || 0,
-        downvotes: r.voting?.down_vote?.length || 0,
-        isDeleted: r.deleted || false,
+        upvotes: typeof r.upvotes === 'number' ? r.upvotes : r.voting?.up_vote?.length || 0,
+        downvotes: typeof r.downvotes === 'number' ? r.downvotes : r.voting?.down_vote?.length || 0,
+        isDeleted: typeof r.isDeleted === 'boolean' ? r.isDeleted : r.deleted || false,
+        tasks: Array.isArray(r.tasks) ? r.tasks.length : (typeof r.tasks === 'number' ? r.tasks : 0),
       })))
     );
   }

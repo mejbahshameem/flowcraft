@@ -25,15 +25,15 @@
   @for (c of comments(); track c._id) {
     <article class="comment-item">
       <div class="avatar">
-        @if (c.commenter?.avatar) {
+        @if (c.commenter.avatar) {
           <img [src]="c.commenter.avatar" [alt]="c.commenter.name" />
         } @else {
-          <span>{{ initialOf(c.commenter?.name) }}</span>
+          <span>{{ initialOf(c.commenter.name) }}</span>
         }
       </div>
       <div class="comment-body">
         <header class="comment-header">
-          <span class="commenter-name">{{ c.commenter?.name || 'Unknown' }}</span>
+          <span class="commenter-name">{{ c.commenter.name || 'Unknown' }}</span>
           @if (c.createdAt) {
             <span class="comment-date" [matTooltip]="c.createdAt | date:'medium'">
               {{ relativeTime(c.createdAt) }}

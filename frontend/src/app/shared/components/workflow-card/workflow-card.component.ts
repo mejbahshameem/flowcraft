@@ -22,13 +22,19 @@ export class WorkflowCardComponent {
   readonly upvotes = computed(() => this.workflow().upvotes ?? this.workflow().up_votes ?? 0);
   readonly downvotes = computed(() => this.workflow().downvotes ?? this.workflow().down_votes ?? 0);
   readonly followers = computed(() => this.workflow().followers ?? 0);
-  readonly tasks = computed(() => this.workflow().tasks ?? 0);
+  readonly tasks = computed(() => {
+    const value = this.workflow().tasks;
+    if (Array.isArray(value)) return value.length;
+    return typeof value === 'number' ? value : 0;
+  });
   readonly updatedAt = computed<string | null>(() => this.workflow().updatedAt || null);
 
   readonly ownerName = computed(() => {
     const owner = this.workflow().owner;
     if (!owner) return '';
-    if (typeof owner === 'string') return '';
+    if (typeof owner === 'string') {
+      return /^[0-9a-fA-F]{24}$/.test(owner) ? '' : owner;
+    }
     return owner.name || '';
   });
 

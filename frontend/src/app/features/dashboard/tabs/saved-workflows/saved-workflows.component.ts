@@ -74,7 +74,7 @@ export class SavedWorkflowsComponent implements OnInit {
       },
       error: () => {
         this.loading.set(false);
-        this.snackBar.open('Failed to load saved workflows', 'Close', { duration: 4000 });
+        this.snackBar.open('Failed to load followed workflows', 'Close', { duration: 4000 });
       },
     });
   }
@@ -96,7 +96,7 @@ export class SavedWorkflowsComponent implements OnInit {
       },
       error: () => {
         wf.loadingTasks = false;
-        this.snackBar.open('Could not load tasks', 'Close', { duration: 3000 });
+        this.snackBar.open('Could not load steps', 'Close', { duration: 3000 });
       },
     });
   }
@@ -119,7 +119,7 @@ export class SavedWorkflowsComponent implements OnInit {
         this.snackBar.open('Step completed', 'Close', { duration: 2500 });
         this.reloadTasks(wf);
       },
-      error: () => this.snackBar.open('Could not complete task', 'Close', { duration: 3000 }),
+      error: () => this.snackBar.open('Could not complete step', 'Close', { duration: 3000 }),
     });
   }
 

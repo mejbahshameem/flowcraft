@@ -252,7 +252,7 @@ router.post('/workflow/:_id/follow', auth, async (req, res) => {
 
 		wf.followers = wf.followers.concat({ follower: follower._id });
 
-		const { name, description, location, tasks, completed } = wf;
+		const { name, description, location, completed } = wf;
 
 		const wfinstance = new WorkFlowInstance({
 			name,
@@ -262,9 +262,11 @@ router.post('/workflow/:_id/follow', auth, async (req, res) => {
 			owner: req.user._id,
 		});
 
-		const taskDocs = await Task.find({
-			_id: { $in: tasks.map(t => t.task) },
-		});
+		const taskDocs = await Task.find({ workflow: wf._id }).sort({ step_no: 1 });
+
+		if (wf.tasks.length !== taskDocs.length) {
+			wf.tasks = taskDocs.map(task => ({ task: task._id }));
+		}
 
 		await Promise.all(
 			taskDocs.map(async task => {
@@ -564,8 +566,8 @@ router.get('/workflows/popular', async (req, res, next) => {
 			.select('_id name description location voting followers tasks owner updatedAt')
 			.populate('owner', 'name');
 
-		const popular = workflows
-			.map(workflow => ({
+		const popular = await Promise.all(
+			workflows.map(async workflow => ({
 				workflow: workflow._id,
 				name: workflow.name,
 				description: workflow.description,
@@ -576,13 +578,16 @@ router.get('/workflows/popular', async (req, res, next) => {
 				upvotes: workflow.voting?.up_vote?.length || 0,
 				downvotes: workflow.voting?.down_vote?.length || 0,
 				followers: workflow.followers?.length || 0,
-				tasks: workflow.tasks?.length || 0,
+				tasks: await Task.countDocuments({ workflow: workflow._id }),
 				updatedAt: workflow.updatedAt,
 			}))
+		);
+
+		const sortedPopular = popular
 			.sort((a, b) => b.upvotes - a.upvotes || b.followers - a.followers)
 			.slice(0, 10);
 
-		res.status(200).send(popular);
+		res.status(200).send(sortedPopular);
 	} catch (error) {
 		next(error);
 	}
@@ -640,8 +645,28 @@ router.get('/search', escapehtml, async (req, res, next) => {
 			.equals(false)
 			.sort({ score: { $meta: 'textScore' }, [sortBy]: -1 })
 			.limit(limit)
-			.skip(skip);
-		res.status(200).send(docs);
+			.skip(skip)
+			.populate('owner', 'name');
+
+		const results = await Promise.all(
+			docs.map(async workflow => ({
+				_id: workflow._id,
+				name: workflow.name,
+				description: workflow.description,
+				location: workflow.location,
+				access: workflow.access,
+				owner: workflow.owner
+					? { _id: workflow.owner._id, name: workflow.owner.name }
+					: null,
+				upvotes: workflow.voting?.up_vote?.length || 0,
+				downvotes: workflow.voting?.down_vote?.length || 0,
+				isDeleted: workflow.deleted || false,
+				tasks: await Task.countDocuments({ workflow: workflow._id }),
+				updatedAt: workflow.updatedAt,
+			}))
+		);
+
+		res.status(200).send(results);
 	} catch (error) {
 		next(error);
 	}

@@ -25,8 +25,10 @@ router.post('/workflow/tasks/create', auth, escapehtml, async (req, res, next) =
 		});
 		await task.save();
 
-		wf.tasks = wf.tasks.concat({ task: task._id });
-		await wf.save();
+		await WorkFlow.updateOne(
+			{ _id: wf._id, owner: req.user._id },
+			{ $push: { tasks: { task: task._id } } }
+		);
 
 		res.status(201).send(task);
 	} catch (error) {

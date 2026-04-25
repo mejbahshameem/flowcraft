@@ -61,7 +61,7 @@
         </form>
       </mat-step>
 
-      <mat-step label="Add Tasks">
+      <mat-step label="Add Steps">
         <form [formGroup]="taskForm">
           <div class="task-list" formArrayName="tasks">
             @for (task of tasks.controls; track $index; let i = $index) {
@@ -74,7 +74,7 @@
                 </div>
                 <div class="task-fields">
                   <mat-form-field appearance="outline" class="task-name">
-                    <mat-label>Task Name</mat-label>
+                    <mat-label>Step Name</mat-label>
                     <input matInput formControlName="name" maxlength="160" />
                     @if (task.get('name')?.hasError('maxlength')) {
                       <mat-error>Name must be 160 characters or less</mat-error>
@@ -102,7 +102,7 @@
 
           <button mat-stroked-button (click)="addTask()" type="button" class="add-task-btn">
             <mat-icon>add</mat-icon>
-            Add Task
+            Add Step
           </button>
 
           <div class="step-actions">
@@ -122,7 +122,7 @@
             <strong>Visibility:</strong> {{ infoForm.value.access }}
           </p>
 
-          <h4>Tasks ({{ tasks.length }})</h4>
+          <h4>Steps ({{ tasks.length }})</h4>
           @for (task of tasks.controls; track $index; let i = $index) {
             <div class="review-task">
               <span class="step-num">{{ i + 1 }}.</span>
@@ -130,7 +130,7 @@
               <span class="task-days-label">{{ task.value.days_required }} day(s)</span>
             </div>
           } @empty {
-            <p class="no-tasks">No tasks added. You can add them later by editing this workflow.</p>
+            <p class="no-tasks">No steps added. You can add them later by editing this workflow.</p>
           }
         </div>
 

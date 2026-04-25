@@ -35,9 +35,9 @@
     <mat-divider></mat-divider>
 
     <section class="tasks-section">
-      <h2>Tasks ({{ wf.tasks.length }})</h2>
+      <h2>Steps ({{ wf.tasks.length }})</h2>
       @if (wf.tasks.length === 0) {
-        <p class="no-tasks">No tasks have been added to this workflow yet.</p>
+        <p class="no-tasks">No steps have been added to this workflow yet.</p>
       } @else {
         <mat-accordion>
           @for (task of wf.tasks; track task._id) {

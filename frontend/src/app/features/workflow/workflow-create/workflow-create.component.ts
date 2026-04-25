@@ -116,7 +116,7 @@ export class WorkflowCreateComponent implements OnInit {
 
     if (this.isEditMode && taskId) {
       this.taskService.delete(this.workflowId, taskId).subscribe({
-        error: () => this.snackBar.open('Could not delete task', 'Close', { duration: 3000 }),
+        error: () => this.snackBar.open('Could not delete step', 'Close', { duration: 3000 }),
       });
     }
     this.tasks.removeAt(index);

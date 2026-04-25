@@ -4,10 +4,11 @@ export interface Workflow {
   description: string;
   location: string;
   access: string;
-  owner: string | { _id: string; name: string };
+  owner: string | { _id: string; name: string } | null;
   upvotes: number;
   downvotes: number;
   isDeleted: boolean;
+  tasks?: number;
   createdAt?: string;
   updatedAt?: string;
 }

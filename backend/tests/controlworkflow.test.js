@@ -327,7 +327,7 @@ test('Should get all tasks instance inside a workflow instances', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(response.body.length - 1).toBe(workflow4.tasks.length);
+	expect(response.body.length).toBe(workflow4.tasks.length);
 	//We have to do this 'response.body.length - 1' because of one extra property
 	// which is timestamps
 });
@@ -359,7 +359,7 @@ test('Should START a task', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -409,7 +409,7 @@ test('Should END a started task', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -506,7 +506,7 @@ test('Should set Task Deadline notification', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -563,7 +563,7 @@ test('Should NOT START a task which is not startable', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are NOT in step 1 of the workflow should NOT be able to be started
 	// let's try to start a task which is not in step_no 1
@@ -607,7 +607,7 @@ test('Should NOT END a task', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1

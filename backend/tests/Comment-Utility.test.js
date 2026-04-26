@@ -1,4 +1,4 @@
-const request = require('supertest');
+﻿const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/user');
 const { notifiableusers, notify } = require('../src/utility/cronjobs');
@@ -56,7 +56,7 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -144,7 +144,7 @@ test('Should notify user about task deadline', async done => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1

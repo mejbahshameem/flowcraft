@@ -1,59 +1,47 @@
-# Frontend
+# FlowCraft Frontend
 
-This project was generated using [Angular CLI](https://github.com/angular/angular-cli) version 20.3.18.
+Angular 20 single-page application for FlowCraft. Built with the standalone-component architecture, Angular Material, and the new `@angular/build:application` builder.
 
-## Development server
-
-To start a local development server, run:
+## Development
 
 ```bash
-ng serve
+npm install
+npx ng serve
 ```
 
-Once the server is running, open your browser and navigate to `http://localhost:4200/`. The application will automatically reload whenever you modify any of the source files.
+The dev server runs on http://localhost:4200 and proxies `/api/*` to the backend on port 3000 via [`proxy.conf.json`](proxy.conf.json).
 
-## Code scaffolding
-
-Angular CLI includes powerful code scaffolding tools. To generate a new component, run:
+## Build
 
 ```bash
-ng generate component component-name
+npm run build                 # production build (default configuration)
+npm run build -- --configuration development
 ```
 
-For a complete list of available schematics (such as `components`, `directives`, or `pipes`), run:
+Production output lands in `dist/frontend/browser/`. The `production` configuration in [`angular.json`](angular.json) replaces `src/environments/environment.ts` with `environment.prod.ts`, which uses a relative `/api/v1` base URL (the host platform handles the proxy).
+
+## Environments
+
+| File | Used by | `apiUrl` |
+|------|---------|----------|
+| `src/environments/environment.ts` | `ng serve` | `http://localhost:3000/api/v1` |
+| `src/environments/environment.prod.ts` | production builds | `/api/v1` (relative) |
+
+## Testing
+
+Unit tests use Karma + Jasmine. There are currently no `*.spec.ts` files in this project; CI runs a production build to validate the bundle compiles and stays within bundle budgets.
 
 ```bash
-ng generate --help
+npx ng test     # Karma watch mode (when specs are added)
 ```
 
-## Building
+## Deployment
 
-To build the project run:
+The SPA is deployed to **Vercel** (https://flowcraftio.vercel.app). Vercel auto-builds on every push to `main`.
 
-```bash
-ng build
-```
+- Root directory: `frontend`
+- Build command: `npm run build`
+- Output directory: `dist/frontend/browser`
+- [`vercel.json`](vercel.json) rewrites `/api/*` to the Render backend (same-origin, no CORS) and handles SPA fallback for deep links.
 
-This will compile your project and store the build artifacts in the `dist/` directory. By default, the production build optimizes your application for performance and speed.
-
-## Running unit tests
-
-To execute unit tests with the [Karma](https://karma-runner.github.io) test runner, use the following command:
-
-```bash
-ng test
-```
-
-## Running end-to-end tests
-
-For end-to-end (e2e) testing, run:
-
-```bash
-ng e2e
-```
-
-Angular CLI does not come with an end-to-end testing framework by default. You can choose one that suits your needs.
-
-## Additional Resources
-
-For more information on using the Angular CLI, including detailed command references, visit the [Angular CLI Overview and Command Reference](https://angular.dev/tools/cli) page.
+A containerized alternative is also provided in [`Dockerfile`](Dockerfile) (nginx serving the static bundle with a runtime-templated `BACKEND_URL`) for any platform that prefers a container deploy.

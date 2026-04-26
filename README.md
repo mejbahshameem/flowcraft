@@ -1,6 +1,10 @@
 # FlowCraft
 
+[![CI](https://github.com/mejbahshameem/flowcraft/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mejbahshameem/flowcraft/actions/workflows/ci.yml)
+
 A collaborative platform for creating, sharing, and executing step by step workflows. Users can design multi step workflow templates, share them with the community, follow workflows created by others, and track their progress through sequential task completion.
+
+**Live:** Frontend on Vercel — https://flowcraftio.vercel.app · Backend on Render — https://flowcraft-2s58.onrender.com
 
 ## Features
 
@@ -47,7 +51,7 @@ A collaborative platform for creating, sharing, and executing step by step workf
 
 ```
 flowcraft/
-Backend/
+backend/
     config/              # Environment configs (not tracked)
     src/
         db/              # MongoDB connection
@@ -77,9 +81,9 @@ README.md
 
 ### Backend Setup
 
-1. Navigate to the Backend directory:
+1. Navigate to the backend directory:
    ```
-   cd Backend
+   cd backend
    ```
 
 2. Install dependencies:
@@ -130,10 +134,11 @@ README.md
 
 ### Running Tests
 
-**Backend tests** (73 automated test cases across 4 suites):
+**Backend tests** (Jest + Supertest, 4 suites against a test MongoDB):
 ```
-cd Backend
-npm run test
+cd backend
+npm run test       # local watch mode
+npm run test:ci    # single run, used by GitHub Actions
 ```
 
 Make sure config/test.env is configured with valid Gmail credentials and a separate test database URL.
@@ -156,6 +161,12 @@ All API endpoints are versioned under `/api/v1`. Interactive documentation is av
 | Task Control | Start/end tasks, toggle notifications, progress tracking |
 | Comments | Post and retrieve public/private comments |
 | Health | `GET /health` server health check |
+
+## Continuous Integration & Deployment
+
+- **CI:** GitHub Actions runs on every push and pull request to `main` ([`.github/workflows/ci.yml`](.github/workflows/ci.yml)) — backend tests against a MongoDB 7 service container, plus a production frontend build. Status is reflected by the badge above and required-check rules can be enabled in branch protection.
+- **Backend deploy:** Render auto-builds the backend Docker image from `backend/Dockerfile` on every push to `main`.
+- **Frontend deploy:** Vercel auto-builds the Angular SPA from `frontend/` on every push to `main`. `frontend/vercel.json` rewrites `/api/*` to the Render backend so the SPA stays same-origin.
 
 ## License
 

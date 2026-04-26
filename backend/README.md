@@ -136,9 +136,27 @@ All routes are prefixed with `/api/v1`. Full interactive documentation available
 
 ```bash
 npm install
-npm run dev     # Development with nodemon
-npm run test    # Run all 73 test cases
+npm run dev      # Development with nodemon
+npm run test     # Local watch-mode tests against config/test.env
+npm run test:ci  # Single-pass run used by GitHub Actions
 ```
+
+## Docker
+
+A production-ready multi-stage Docker image is provided. Build and run:
+
+```bash
+docker build -t flowcraft-api .
+docker run --rm -p 3000:3000 \
+  -e MONGODB_URL=... \
+  -e JWT_SECRET=... \
+  -e GMAIL_USER=... \
+  -e GMAIL_APP_PASSWORD=... \
+  -e FRONTEND_URL=... \
+  flowcraft-api
+```
+
+The image runs as a non-root user under `tini`, exposes a `HEALTHCHECK` against `/health`, and is the same artifact deployed to Render.
 
 ## Testing
 

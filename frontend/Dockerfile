@@ -24,8 +24,8 @@ COPY nginx.conf.template /etc/nginx/templates/default.conf.template
 COPY docker-entrypoint.sh /docker-entrypoint.d/40-render-config.sh
 RUN chmod +x /docker-entrypoint.d/40-render-config.sh
 
-# BACKEND_URL is the upstream API origin, e.g. https://flowcraft-api.onrender.com
-ENV BACKEND_URL=http://localhost:3000 \
+# BACKEND_URL is the upstream API origin. Override at runtime per environment.
+ENV BACKEND_URL=https://flowcraft-2s58.onrender.com \
     PORT=8080
 
 EXPOSE 8080

@@ -1,4 +1,4 @@
-const request = require('supertest');
+﻿const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/user');
 const mongoose = require('mongoose');
@@ -367,7 +367,7 @@ test('Should START a task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -417,7 +417,7 @@ test('Should END a started task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -431,7 +431,7 @@ test('Should END a started task', async () => {
 
 	//Now we can also End this task as it is in progress.
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/end`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/end`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -514,7 +514,7 @@ test('Should set Task Deadline notification', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -527,7 +527,7 @@ test('Should set Task Deadline notification', async () => {
 	expect(task.status).toEqual(taskStatus.IN_PROGRESS);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/notify`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/notify`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
@@ -571,7 +571,7 @@ test('Should NOT START a task which is not startable', async () => {
 	const index_second_step = tasks.body.findIndex(task => task.step_no === 2);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -615,7 +615,7 @@ test('Should NOT END a task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -632,7 +632,7 @@ test('Should NOT END a task', async () => {
 	const index_second_step = tasks.body.findIndex(task => task.step_no === 2);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/end`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/end`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()

@@ -1,0 +1,61 @@
+server {
+    listen       ${PORT};
+    server_name  _;
+
+    root   /usr/share/nginx/html;
+    index  index.html;
+
+    # Hardening
+    server_tokens off;
+    add_header X-Content-Type-Options "nosniff" always;
+    add_header X-Frame-Options        "DENY"    always;
+    add_header Referrer-Policy        "no-referrer-when-downgrade" always;
+
+    # Compression
+    gzip on;
+    gzip_comp_level 6;
+    gzip_min_length 1024;
+    gzip_proxied any;
+    gzip_vary on;
+    gzip_types
+        text/plain text/css text/xml application/json application/javascript
+        application/xml application/xml+rss text/javascript image/svg+xml
+        font/ttf font/otf application/font-woff application/font-woff2;
+
+    # Long-cache hashed assets
+    location ~* \.(?:js|css|woff2?|ttf|otf|eot|svg|ico|png|jpg|jpeg|gif|webp)$ {
+        expires 1y;
+        access_log off;
+        add_header Cache-Control "public, immutable";
+        try_files $uri =404;
+    }
+
+    # Never cache index.html so deploys roll out instantly
+    location = /index.html {
+        add_header Cache-Control "no-store, no-cache, must-revalidate" always;
+        expires 0;
+    }
+
+    # Local healthcheck endpoint for the container
+    location = /healthz {
+        access_log off;
+        return 200 "ok\n";
+    }
+
+    # Proxy API calls to the backend service
+    location /api/ {
+        proxy_pass         ${BACKEND_URL};
+        proxy_http_version 1.1;
+        proxy_set_header   Host              $host;
+        proxy_set_header   X-Real-IP         $remote_addr;
+        proxy_set_header   X-Forwarded-For   $proxy_add_x_forwarded_for;
+        proxy_set_header   X-Forwarded-Proto $scheme;
+        proxy_read_timeout 60s;
+        proxy_send_timeout 60s;
+    }
+
+    # SPA fallback
+    location / {
+        try_files $uri $uri/ /index.html;
+    }
+}

@@ -12,7 +12,7 @@ var task5_id = new mongoose.mongo.ObjectId('56cb91bdc3464f14678934ca');
 var task6_id = new mongoose.mongo.ObjectId('56cb91bdc3464f14678934cb');
 var task3_id = new mongoose.mongo.ObjectId('56cb91bdc3464f14678934cc');
 
-const userOne_id = mongoose.Types.ObjectId();
+const userOne_id = new mongoose.Types.ObjectId();
 const userOne = {
 	_id: userOne_id,
 	name: 'testuser1',
@@ -27,7 +27,7 @@ const userOne = {
 	],
 };
 
-const usertwo_id = mongoose.Types.ObjectId();
+const usertwo_id = new mongoose.Types.ObjectId();
 const usertwo = {
 	_id: usertwo_id,
 	name: 'testuser2',

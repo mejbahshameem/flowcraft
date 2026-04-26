@@ -5,6 +5,12 @@ const TaskNotification = require('../models/tasknotification');
 const { taskStatus } = require('../utility/enums');
 const { sendDeadlineNotification } = require('../utility/emailService');
 
+// Skip scheduling under Jest so the test process can exit cleanly.
+if (process.env.NODE_ENV === 'test') {
+	module.exports = {};
+	return;
+}
+
 //cron job time setting it to 6pm/18:00. Run cron job 6 hours before start sending emails to minimize latency.
 //const notifiableusers = async function() {
 //add this function while running the cronjob test

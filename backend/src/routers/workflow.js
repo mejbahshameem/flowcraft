@@ -117,6 +117,45 @@ router.post('/workflow/:_id/copy', auth, async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow/{_id}/edit:
+ *   patch:
+ *     summary: Edit a workflow that the caller owns
+ *     description: |
+ *       Updates one or more of the editable fields on an existing workflow.
+ *       Only the workflow owner can edit, and only soft non deleted workflows
+ *       are eligible. Any field not in the allowed list causes a 400.
+ *     tags: [Workflows]
+ *     operationId: editWorkflow
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - $ref: '#/components/parameters/ObjectIdPath'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             additionalProperties: false
+ *             properties:
+ *               name: { type: string, maxLength: 120 }
+ *               description: { type: string, maxLength: 4000 }
+ *               location: { type: string, maxLength: 160 }
+ *               access: { type: string, enum: [PUBLIC, PRIVATE] }
+ *             example:
+ *               name: Onboarding playbook
+ *               access: PUBLIC
+ *     responses:
+ *       200:
+ *         description: Workflow updated.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Workflow' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       500: { $ref: '#/components/responses/ServerError' }
+ */
 //Edit the basic info of the existing workflow
 //Editable field workflow name, description, location, access
 
@@ -411,6 +450,46 @@ router.delete('/workflow/:_id/vote', auth, async (req, res, next) => {
 	}
 });
 
+/**
+ * @swagger
+ * /workflow/{_id}/vote:
+ *   post:
+ *     summary: Cast or change a vote on a workflow
+ *     description: |
+ *       Adds the callers vote to the workflow. A user can only have one
+ *       active vote per workflow: voting `UP_VOTE` while already in the
+ *       downvote list switches the vote, and voting the same direction
+ *       twice returns 400.
+ *     tags: [Workflows]
+ *     operationId: castWorkflowVote
+ *     security: [{ BearerAuth: [] }]
+ *     parameters:
+ *       - $ref: '#/components/parameters/ObjectIdPath'
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [vote]
+ *             properties:
+ *               vote: { type: string, enum: [UP_VOTE, DOWN_VOTE] }
+ *             example: { vote: UP_VOTE }
+ *     responses:
+ *       200:
+ *         description: Vote recorded or vote direction changed.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success:
+ *                   oneOf:
+ *                     - { type: boolean }
+ *                     - { type: string, example: Vote change successful }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ */
 //Registered user voting a workflow
 router.post('/workflow/:_id/vote', auth, escapehtml, async (req, res) => {
 	const { _id } = req.params;

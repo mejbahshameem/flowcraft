@@ -456,6 +456,26 @@ router.post('/users/logoutAll/:token', async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /users/me:
+ *   get:
+ *     summary: Get the authenticated user profile
+ *     description: |
+ *       Returns the full user document for the bearer token holder. Sensitive
+ *       fields such as the password hash and active session tokens are
+ *       stripped by the model's `toJSON` transform before serialization.
+ *     tags: [Users]
+ *     operationId: getCurrentUser
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: User profile.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/User' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ */
 //Get current authenticated user profile
 router.get('/users/me', auth, async (req, res) => {
 	try {

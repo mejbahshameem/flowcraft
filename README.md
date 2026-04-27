@@ -146,16 +146,23 @@ npx ng test
 
 ## API Overview
 
-All API endpoints are versioned under `/api/v1`. Interactive documentation is available at `/api/docs` when the server is running.
+All API endpoints are versioned under `/api/v1` (the health probe at `/health` is the only exception). The full interactive specification is rendered with Swagger UI at `/api/docs`, generated from JSDoc `@swagger` annotations in [`backend/src/routers/`](backend/src/routers/) and the shared components in [`backend/src/config/swagger.js`](backend/src/config/swagger.js).
 
 | Resource | Endpoints |
 |----------|-----------|
 | Users | Registration, login, logout, profile update, avatar upload, password reset, account activation/deactivation |
 | Workflows | Create, edit, delete, copy, follow/unfollow, vote, search |
 | Tasks | Create, edit, delete within workflows |
-| Task Control | Start/end tasks, toggle notifications, progress tracking |
+| User Workflows | Start/end tasks, toggle notifications, progress tracking |
 | Comments | Post and retrieve public/private comments |
-| Health | `GET /health` server health check |
+| System | `GET /health` for liveness probes used by the container HEALTHCHECK and Render |
+
+### Live API Documentation
+
+| Environment | Swagger UI | Raw OpenAPI JSON |
+|-------------|------------|------------------|
+| Local | http://localhost:3000/api/docs | http://localhost:3000/api/docs.json |
+| Production | https://flowcraft-2s58.onrender.com/api/docs | https://flowcraft-2s58.onrender.com/api/docs.json |
 
 ## License
 

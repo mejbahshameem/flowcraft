@@ -71,12 +71,25 @@ const syncWorkflowInstanceTasks = async (user, workflowInstanceId) => {
  * @swagger
  * /users/me/workflowinstance/following/all:
  *   get:
- *     summary: Get all followed workflows with progress
+ *     summary: List all workflows the caller is currently following
+ *     description: |
+ *       Returns one entry per followed workflow with a completion
+ *       percentage derived from the count of `COMPLETED` task instances.
+ *       The endpoint also reconciles task drift: if the source workflow
+ *       gained tasks since the user followed it, missing task instances
+ *       are created on the fly before the percentage is computed.
  *     tags: [User Workflows]
+ *     operationId: listFollowedWorkflows
  *     security: [{ BearerAuth: [] }]
  *     responses:
- *       200: { description: List of followed workflows with completion percentage }
- *       404: { description: Not following any workflows }
+ *       200:
+ *         description: Followed workflow summaries.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/FollowedWorkflowSummary' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //getting the currently following workflow of a user and also the current progress
 router.get(
@@ -149,12 +162,24 @@ router.get(
  * @swagger
  * /user/me/created-workflows/all:
  *   get:
- *     summary: Get all workflows created by current user
+ *     summary: List workflows owned by the caller
+ *     description: |
+ *       Returns each non deleted workflow the user owns with vote and
+ *       follower counts plus an `is_copy` flag derived from
+ *       `source_workflow`. Useful for the dashboard "my workflows" view.
  *     tags: [User Workflows]
+ *     operationId: listOwnedWorkflows
  *     security: [{ BearerAuth: [] }]
  *     responses:
- *       200: { description: List of created workflows with vote stats }
- *       404: { description: No workflows found }
+ *       200:
+ *         description: Owned workflows with aggregate counts.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/CreatedWorkflowSummary' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //get all created workflows for a particular user
 router.get('/user/me/created-workflows/all', auth, async (req, res) => {
@@ -191,17 +216,31 @@ router.get('/user/me/created-workflows/all', auth, async (req, res) => {
  * @swagger
  * /following/workflow/{_id}/tasks/all:
  *   get:
- *     summary: Get all tasks for a followed workflow
+ *     summary: List the callers personal task instances for a followed workflow
+ *     description: |
+ *       Returns the per follower task instances ordered by `step_no`. New
+ *       tasks added to the source workflow are reconciled into the
+ *       instance before the response is returned, so the list always
+ *       matches the latest template structure.
  *     tags: [User Workflows]
+ *     operationId: listFollowedWorkflowTasks
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: _id
  *         required: true
- *         schema: { type: string }
+ *         description: Workflow instance id, not the source workflow id.
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     responses:
- *       200: { description: Task list with current step info }
- *       400: { description: Workflow not found }
+ *       200:
+ *         description: Ordered task instance list.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/TaskInstance' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //get all taskinstance for a particular workflowinstance
 router.get('/following/workflow/:_id/tasks/all', auth, async (req, res) => {
@@ -232,21 +271,37 @@ router.get('/following/workflow/:_id/tasks/all', auth, async (req, res) => {
  * @swagger
  * /following/workflow/{wfid}/task/{tkid}/start:
  *   post:
- *     summary: Start a task in a followed workflow
+ *     summary: Start a task on the caller's followed workflow instance
+ *     description: |
+ *       Transitions the task from `NOT_STARTED` to `IN_PROGRESS` and
+ *       records the start time. The task must belong to the current step
+ *       of an active (non completed) workflow instance.
  *     tags: [User Workflows]
+ *     operationId: startFollowedTask
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: wfid
  *         required: true
- *         schema: { type: string }
+ *         description: Workflow instance id.
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *       - in: path
  *         name: tkid
  *         required: true
- *         schema: { type: string }
+ *         description: Task instance id.
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     responses:
- *       200: { description: Task started with time tracking }
- *       400: { description: Invalid operation or task not found }
+ *       200:
+ *         description: Updated task instance.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/TaskInstance' }
+ *       400:
+ *         description: Task is not in the current step or already started.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 // Start a particular task. Double Check Startability from the backend also
 router.post(
@@ -294,21 +349,33 @@ router.post(
  * @swagger
  * /following/workflow/{wfid}/task/{tkid}/end:
  *   post:
- *     summary: Complete a task in a followed workflow
+ *     summary: Complete a task and advance the workflow instance
+ *     description: |
+ *       Marks the task `COMPLETED` and stamps its end time. When every
+ *       task at the current step is complete, the instance step counter is
+ *       incremented. When all task instances are complete, the instance is
+ *       flagged `completed` and the corresponding follower entry on the
+ *       source workflow is also marked done.
  *     tags: [User Workflows]
+ *     operationId: completeFollowedTask
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: wfid
  *         required: true
- *         schema: { type: string }
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *       - in: path
  *         name: tkid
  *         required: true
- *         schema: { type: string }
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     responses:
- *       200: { description: Task completed }
- *       400: { description: Invalid operation or task not found }
+ *       200:
+ *         description: Task completed.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 // End/Complete a particular task. Double Check Startability from the backend also
 router.post(
@@ -408,29 +475,45 @@ router.post(
  * @swagger
  * /following/workflow/{wfid}/task/{tkid}/notify:
  *   post:
- *     summary: Toggle task deadline email notification
+ *     summary: Enable or disable a deadline reminder email for a task
+ *     description: |
+ *       Sets the `notification` flag on the task instance. The cron job in
+ *       `utility/cronjobs.js` scans tasks where the flag is true and sends
+ *       a deadline email shortly before the configured end time.
  *     tags: [User Workflows]
+ *     operationId: toggleTaskNotification
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: wfid
  *         required: true
- *         schema: { type: string }
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *       - in: path
  *         name: tkid
  *         required: true
- *         schema: { type: string }
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     requestBody:
  *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             required: [task_notification]
  *             properties:
  *               task_notification: { type: boolean }
+ *             example: { task_notification: true }
  *     responses:
- *       200: { description: Notification setting updated }
- *       400: { description: Invalid task or already completed }
+ *       200:
+ *         description: Notification preference saved.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 success: { type: boolean }
+ *                 notification: { type: boolean }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 // Enable/Disable task deadline email notification
 router.post(
@@ -465,11 +548,23 @@ router.post(
  * @swagger
  * /user/voting/history:
  *   get:
- *     summary: Get voting history for current user
+ *     summary: List every workflow the caller has voted on
+ *     description: |
+ *       Returns one entry per upvoted or downvoted workflow with the
+ *       direction of the vote. Deleted workflows are excluded. Useful for
+ *       rendering the "your activity" section of the user profile.
  *     tags: [User Workflows]
+ *     operationId: getVotingHistory
  *     security: [{ BearerAuth: [] }]
  *     responses:
- *       200: { description: List of upvoted and downvoted workflows }
+ *       200:
+ *         description: Voting history.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/VotingHistoryEntry' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 // Get the voting history for a particular user
 router.get('/user/voting/history', auth, async (req, res, next) => {

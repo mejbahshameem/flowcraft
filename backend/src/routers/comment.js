@@ -14,7 +14,16 @@ const { commentType } = require('../utility/enums');
  * /comment/post:
  *   post:
  *     summary: Post a comment on a workflow
+ *     description: |
+ *       Two distinct comment types share this endpoint. `PUBLIC` comments
+ *       attach to the source workflow template and are visible to everyone
+ *       who can view it. `PRIVATE` comments attach to the callers personal
+ *       workflow instance and act as private notes that only the owner can
+ *       see. Posting a `PRIVATE` comment on a public template, or a
+ *       `PUBLIC` comment on a workflow instance, returns 403. Rate limited
+ *       to 30 posts per 10 minutes per IP.
  *     tags: [Comments]
+ *     operationId: postComment
  *     security: [{ BearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -24,12 +33,25 @@ const { commentType } = require('../utility/enums');
  *             type: object
  *             required: [comment, workflow, comment_type]
  *             properties:
- *               comment: { type: string }
- *               workflow: { type: string }
+ *               comment: { type: string, maxLength: 2000 }
+ *               workflow:
+ *                 allOf: [{ $ref: '#/components/schemas/ObjectId' }]
+ *                 description: Either a workflow id (PUBLIC) or a workflow instance id (PRIVATE).
  *               comment_type: { type: string, enum: [PUBLIC, PRIVATE] }
+ *             example:
+ *               comment: 'Great workflow, very helpful!'
+ *               workflow: 64f6a1b2c3d4e5f60718293a
+ *               comment_type: PUBLIC
  *     responses:
- *       201: { description: Comment posted }
- *       400: { description: Invalid comment or workflow }
+ *       201:
+ *         description: Comment created.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Comment' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404: { $ref: '#/components/responses/NotFound' }
+ *       429: { $ref: '#/components/responses/RateLimited' }
  */
 //posting a comment in other workflows. Both Public and private comments supported. May have 1 and 2
 router.post('/comment/post', auth, commentLimiter, escapehtml, async (req, res, next) => {
@@ -69,24 +91,39 @@ router.post('/comment/post', auth, commentLimiter, escapehtml, async (req, res, 
  * @swagger
  * /workflow/{_id}/comments/{type}/all/{token}:
  *   get:
- *     summary: Get all comments for a workflow
+ *     summary: List comments on a workflow or workflow instance
+ *     description: |
+ *       `PUBLIC` comments are returned for any caller. `PRIVATE` comments
+ *       require the optional `token` segment to verify the caller owns the
+ *       workflow instance, since private comments are personal notes
+ *       rather than community discussion.
  *     tags: [Comments]
+ *     operationId: listComments
  *     parameters:
  *       - in: path
  *         name: _id
  *         required: true
- *         schema: { type: string }
+ *         description: Workflow id (for PUBLIC) or workflow instance id (for PRIVATE).
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *       - in: path
  *         name: type
  *         required: true
- *         schema: { type: string, enum: [public, private] }
+ *         schema: { type: string, enum: [PUBLIC, PRIVATE] }
  *       - in: path
  *         name: token
  *         required: false
+ *         description: Owner JWT, required for PRIVATE comments. Use the `owner` token returned by `GET /workflow/{_id}/view`.
  *         schema: { type: string }
  *     responses:
- *       200: { description: List of comments }
- *       400: { description: Workflow not found or unauthorized }
+ *       200:
+ *         description: Comments sorted by `createdAt` descending. The `commenter` field is populated with `{ _id, name, avatar }`.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/Comment' }
+ *       403: { $ref: '#/components/responses/Forbidden' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  *///get all the comments of a workflow.
 router.get('/workflow/:_id/comments/:type/all/:token?', async (req, res, next) => {
 	const { _id, type, token } = req.params;

@@ -4,6 +4,47 @@ const auth = require('../middleware/auth');
 const escapehtml = require('../middleware/escape-html');
 const Task = require('../models/task');
 const WorkFlow = require('../models/workflow');
+
+/**
+ * @swagger
+ * /workflow/tasks/create:
+ *   post:
+ *     summary: Add a task to a workflow the caller owns
+ *     description: |
+ *       Appends a new task to an owned workflow. The owner sets a step
+ *       number and an estimated duration in days; followers later see this
+ *       data on their personal task instances.
+ *     tags: [Tasks]
+ *     operationId: createTask
+ *     security: [{ BearerAuth: [] }]
+ *     requestBody:
+ *       required: true
+ *       content:
+ *         application/json:
+ *           schema:
+ *             type: object
+ *             required: [workflow, name, step_no, days_required]
+ *             properties:
+ *               workflow: { $ref: '#/components/schemas/ObjectId' }
+ *               name: { type: string, maxLength: 120 }
+ *               description: { type: string }
+ *               step_no: { type: integer, minimum: 1 }
+ *               days_required: { type: number, minimum: 0 }
+ *             example:
+ *               workflow: 64f6a1b2c3d4e5f60718293a
+ *               name: Set up workstation
+ *               description: Install required tooling and join the team chat
+ *               step_no: 1
+ *               days_required: 1
+ *     responses:
+ *       201:
+ *         description: Task created.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Task' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
+ */
 //Create task for the workflow
 //workflow id is in req.body
 router.post('/workflow/tasks/create', auth, escapehtml, async (req, res, next) => {
@@ -76,17 +117,25 @@ router.post('/workflow/tasks/create', auth, escapehtml, async (req, res, next) =
  * @swagger
  * /workflow/{_id}/tasks/all:
  *   get:
- *     summary: Get all tasks for a workflow
+ *     summary: List all tasks in an owned workflow
+ *     description: |
+ *       Returns the workflow's display fields together with its task list,
+ *       intended for the workflow owners editing view. Followers should
+ *       use `GET /following/workflow/{_id}/tasks/all` instead, which
+ *       returns per follower task instance state.
  *     tags: [Tasks]
+ *     operationId: listWorkflowTasks
  *     security: [{ BearerAuth: [] }]
  *     parameters:
- *       - in: path
- *         name: _id
- *         required: true
- *         schema: { type: string }
+ *       - $ref: '#/components/parameters/ObjectIdPath'
  *     responses:
- *       200: { description: Workflow info with tasks }
- *       400: { description: Workflow not found }
+ *       200:
+ *         description: Workflow header with task array.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/WorkflowTasksList' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //get all tasks for a particular workflow
 router.get('/workflow/:_id/tasks/all', auth, async (req, res) => {
@@ -132,31 +181,46 @@ router.get('/workflow/:_id/tasks/all', auth, async (req, res) => {
  * @swagger
  * /workflow/{wfid}/tasks/{tkid}:
  *   patch:
- *     summary: Edit an existing task
+ *     summary: Edit a task
+ *     description: |
+ *       Partial update for a task. Only `name`, `description`,
+ *       `days_required`, and `step_no` are editable; any other field is
+ *       silently ignored. The task must belong to a workflow owned by the
+ *       caller.
  *     tags: [Tasks]
+ *     operationId: updateTask
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: wfid
  *         required: true
- *         schema: { type: string }
+ *         description: Owning workflow id.
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *       - in: path
  *         name: tkid
  *         required: true
- *         schema: { type: string }
+ *         description: Task id.
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     requestBody:
+ *       required: true
  *       content:
  *         application/json:
  *           schema:
  *             type: object
+ *             additionalProperties: false
  *             properties:
  *               name: { type: string }
  *               description: { type: string }
- *               days_required: { type: integer }
- *               step_no: { type: integer }
+ *               days_required: { type: number, minimum: 0 }
+ *               step_no: { type: integer, minimum: 1 }
  *     responses:
- *       200: { description: Task updated }
- *       400: { description: Invalid updates or not found }
+ *       200:
+ *         description: Updated task.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Task' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 //Edit an existing task
 //Editable field task name and description
@@ -197,21 +261,31 @@ router.patch(
  * @swagger
  * /workflow/{wfid}/tasks/{tkid}:
  *   delete:
- *     summary: Delete a task from a workflow
+ *     summary: Remove a task from a workflow
+ *     description: |
+ *       Permanently deletes the task document and removes its reference
+ *       from the parent workflow's `tasks` array. Existing follower task
+ *       instances created before deletion are left intact.
  *     tags: [Tasks]
+ *     operationId: deleteTask
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: wfid
  *         required: true
- *         schema: { type: string }
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *       - in: path
  *         name: tkid
  *         required: true
- *         schema: { type: string }
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     responses:
- *       200: { description: Task deleted }
- *       400: { description: Workflow not found }
+ *       200:
+ *         description: Task deleted.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 //delete a task in the workflow
 router.delete('/workflow/:wfid/tasks/:tkid', auth, async (req, res, next) => {

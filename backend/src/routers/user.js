@@ -20,7 +20,13 @@ const {
  * /users/create:
  *   post:
  *     summary: Register a new user account
+ *     description: |
+ *       Creates a new account in the `NOT_ACTIVATED` state and emails an
+ *       activation token. The recipient must call `GET /user/{token}` from
+ *       the link in that email before they can log in. Rate limited to 20
+ *       attempts per 15 minutes per IP via the auth limiter.
  *     tags: [Users]
+ *     operationId: createUser
  *     requestBody:
  *       required: true
  *       content:
@@ -29,13 +35,21 @@ const {
  *             type: object
  *             required: [name, email, password, confirmPassword]
  *             properties:
- *               name: { type: string }
- *               email: { type: string, format: email }
- *               password: { type: string, minLength: 7 }
- *               confirmPassword: { type: string }
+ *               name: { type: string, example: 'Ada Lovelace' }
+ *               email: { type: string, format: email, example: 'ada@example.com' }
+ *               password: { type: string, minLength: 7, format: password }
+ *               confirmPassword: { type: string, format: password }
  *     responses:
- *       201: { description: Account created, activation email sent }
- *       400: { description: Validation error or passwords do not match }
+ *       201:
+ *         description: Account created and activation email queued.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucess: { type: boolean, example: true }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       429: { $ref: '#/components/responses/RateLimited' }
  */
 //Create a new user
 router.post('/users/create', authLimiter, escapehtml, async (req, res) => {
@@ -61,16 +75,32 @@ router.post('/users/create', authLimiter, escapehtml, async (req, res) => {
  * @swagger
  * /user/{token}:
  *   get:
- *     summary: Activate account or get user by token
+ *     summary: Activate an account or look up a user by JWT
+ *     description: |
+ *       Two behaviours share the same path. If the user is currently
+ *       `NOT_ACTIVATED`, the account is flipped to `ACTIVATED` and a
+ *       `{ success: true }` response is returned. Otherwise the populated
+ *       user document is returned, which is how the workflow detail view
+ *       reverse looks up an owner from a signed identifier.
  *     tags: [Users]
+ *     operationId: getUserByToken
  *     parameters:
  *       - in: path
  *         name: token
  *         required: true
+ *         description: Account or owner JWT signed with `JWT_SECRET`.
  *         schema: { type: string }
  *     responses:
- *       200: { description: Account activated or user data returned }
- *       400: { description: Invalid token or user not found }
+ *       200:
+ *         description: Activation result or user document.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               oneOf:
+ *                 - { $ref: '#/components/schemas/Success' }
+ *                 - { $ref: '#/components/schemas/User' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //Activate user by a matching token or return a user to the requested client
 router.get('/user/:token', async (req, res) => {
@@ -103,17 +133,31 @@ router.get('/user/:token', async (req, res) => {
  * @swagger
  * /users/deactivate/{token}:
  *   post:
- *     summary: Request account deactivation
+ *     summary: Request a deactivation confirmation email
+ *     description: |
+ *       Generates a fresh single use account token and emails it to the
+ *       authenticated user. Confirming via `POST /deactivate/{token}` then
+ *       flips the account status to `DELETED` and revokes all sessions.
  *     tags: [Users]
+ *     operationId: requestDeactivation
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: token
  *         required: true
+ *         description: Existing account token used to confirm the caller's identity.
  *         schema: { type: string }
  *     responses:
- *       200: { description: Deactivation email sent }
- *       400: { description: Invalid token }
+ *       200:
+ *         description: Deactivation email queued.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: object
+ *               properties:
+ *                 sucess: { type: boolean, example: true }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //Deactivate Account request
 router.post('/users/deactivate/:token', auth, async (req, res) => {
@@ -142,16 +186,22 @@ router.post('/users/deactivate/:token', auth, async (req, res) => {
  * @swagger
  * /deactivate/{token}:
  *   post:
- *     summary: Confirm account deactivation
+ *     summary: Confirm and finalize account deactivation
+ *     description: |
+ *       Marks the account as `DELETED` and clears every active session
+ *       token. The link emailed by `POST /users/deactivate/{token}` calls
+ *       this endpoint with the single use token.
  *     tags: [Users]
+ *     operationId: confirmDeactivation
  *     parameters:
  *       - in: path
  *         name: token
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200: { description: Account deactivated }
- *       400: { description: Invalid token }
+ *       200: { description: Account deactivated. }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //Deactivate user account by a matching token
 router.post('/deactivate/:token', async (req, res) => {
@@ -181,8 +231,14 @@ router.post('/deactivate/:token', async (req, res) => {
  * @swagger
  * /user/account/forget/password:
  *   post:
- *     summary: Request a password reset email
+ *     summary: Trigger a password reset email
+ *     description: |
+ *       Always responds with `{ success: true }` regardless of whether the
+ *       email matches a real account, to avoid leaking which addresses are
+ *       registered. When a match exists the user receives an email
+ *       containing a single use reset token. Rate limited.
  *     tags: [Users]
+ *     operationId: forgotPassword
  *     requestBody:
  *       required: true
  *       content:
@@ -193,7 +249,12 @@ router.post('/deactivate/:token', async (req, res) => {
  *             properties:
  *               email: { type: string, format: email }
  *     responses:
- *       200: { description: Reset email sent if account exists }
+ *       200:
+ *         description: Reset email dispatched if the address is registered.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       429: { $ref: '#/components/responses/RateLimited' }
  */
 //Password reset request
 router.post('/user/account/forget/password', authLimiter, escapehtml, async (req, res) => {
@@ -219,8 +280,13 @@ router.post('/user/account/forget/password', authLimiter, escapehtml, async (req
  * @swagger
  * /user/account/reset/password:
  *   post:
- *     summary: Reset password using token
+ *     summary: Set a new password using a reset token
+ *     description: |
+ *       Consumes the reset token sent by `POST /user/account/forget/password`
+ *       and replaces the user's password. All previously issued session
+ *       tokens are revoked, forcing other devices to log in again.
  *     tags: [Users]
+ *     operationId: resetPassword
  *     requestBody:
  *       required: true
  *       content:
@@ -230,11 +296,20 @@ router.post('/user/account/forget/password', authLimiter, escapehtml, async (req
  *             required: [token, password, confirmPassword]
  *             properties:
  *               token: { type: string }
- *               password: { type: string, minLength: 7 }
- *               confirmPassword: { type: string }
+ *               password: { type: string, minLength: 7, format: password }
+ *               confirmPassword: { type: string, format: password }
  *     responses:
- *       200: { description: Password reset successful }
- *       400: { description: Invalid token or passwords do not match }
+ *       200:
+ *         description: Password updated.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       400:
+ *         description: Token expired or invalid, or passwords do not match.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       429: { $ref: '#/components/responses/RateLimited' }
  */
 // Reset password with token and new password in request body
 router.post('/user/account/reset/password', authLimiter, escapehtml, async (req, res) => {
@@ -276,8 +351,14 @@ router.post('/user/account/reset/password', authLimiter, escapehtml, async (req,
  * @swagger
  * /match/{token1}/{token2}:
  *   get:
- *     summary: Check if two tokens belong to the same user
+ *     summary: Check whether two signed user tokens reference the same account
+ *     description: |
+ *       Useful for the comment flow, where the workflow detail view returns
+ *       a signed owner identifier. The frontend can then ask the server
+ *       whether the viewer matches that owner without exposing the raw user
+ *       id.
  *     tags: [Users]
+ *     operationId: matchUserTokens
  *     parameters:
  *       - in: path
  *         name: token1
@@ -288,8 +369,12 @@ router.post('/user/account/reset/password', authLimiter, escapehtml, async (req,
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200: { description: Match result returned }
- *       400: { description: Invalid tokens }
+ *       200:
+ *         description: Match decision.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/MatchResponse' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
  */
 //Match two user
 router.get('/match/:token1/:token2', async (req, res) => {
@@ -324,8 +409,15 @@ router.get('/match/:token1/:token2', async (req, res) => {
  * @swagger
  * /users/login:
  *   post:
- *     summary: Authenticate user and get token
+ *     summary: Authenticate and obtain a bearer token
+ *     description: |
+ *       Verifies the email and password and returns a fresh JWT plus the
+ *       basic profile fields the frontend needs for its session. If the
+ *       account is still `NOT_ACTIVATED`, the response is 403 with the
+ *       `NotActivatedError` shape so clients can offer a resend prompt.
+ *       Rate limited to 20 attempts per 15 minutes per IP.
  *     tags: [Users]
+ *     operationId: loginUser
  *     requestBody:
  *       required: true
  *       content:
@@ -335,10 +427,23 @@ router.get('/match/:token1/:token2', async (req, res) => {
  *             required: [email, password]
  *             properties:
  *               email: { type: string, format: email }
- *               password: { type: string }
+ *               password: { type: string, format: password }
+ *             example:
+ *               email: ada@example.com
+ *               password: 'correct-horse-battery-staple'
  *     responses:
- *       200: { description: Login successful, returns user info and token }
- *       400: { description: Invalid credentials }
+ *       200:
+ *         description: Authenticated. Returns the bearer token and minimal user info.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/LoginResponse' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       403:
+ *         description: Account exists but is not activated yet.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/NotActivatedError' }
+ *       429: { $ref: '#/components/responses/RateLimited' }
  */
 //user login
 router.post('/users/login', authLimiter, escapehtml, async (req, res) => {
@@ -368,8 +473,13 @@ router.post('/users/login', authLimiter, escapehtml, async (req, res) => {
  * @swagger
  * /users/activation/resend:
  *   post:
- *     summary: Resend the activation email for an inactive account
+ *     summary: Resend the account activation email
+ *     description: |
+ *       Reissues a fresh activation token for an account that is still in
+ *       the `NOT_ACTIVATED` state. Always responds 200 so callers cannot
+ *       enumerate which addresses are registered or already activated.
  *     tags: [Users]
+ *     operationId: resendActivation
  *     requestBody:
  *       required: true
  *       content:
@@ -380,7 +490,13 @@ router.post('/users/login', authLimiter, escapehtml, async (req, res) => {
  *             properties:
  *               email: { type: string, format: email }
  *     responses:
- *       200: { description: Activation email sent if the account is pending }
+ *       200:
+ *         description: Activation email queued if applicable.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       429: { $ref: '#/components/responses/RateLimited' }
  */
 router.post('/users/activation/resend', authLimiter, escapehtml, async (req, res, next) => {
 	try {
@@ -405,11 +521,19 @@ router.post('/users/activation/resend', authLimiter, escapehtml, async (req, res
  * @swagger
  * /users/logout:
  *   post:
- *     summary: Logout from current device
+ *     summary: Log the current session out
+ *     description: Removes the bearer token from the user's `tokens` array. Other active sessions on the same account stay valid.
  *     tags: [Users]
+ *     operationId: logoutCurrentSession
  *     security: [{ BearerAuth: [] }]
  *     responses:
- *       200: { description: Logged out successfully }
+ *       200:
+ *         description: Session terminated.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //LOGOUT User
 router.post('/users/logout', auth, async (req, res) => {
@@ -428,15 +552,25 @@ router.post('/users/logout', auth, async (req, res) => {
  * @swagger
  * /users/logoutAll/{token}:
  *   post:
- *     summary: Logout from all devices
+ *     summary: Revoke every active session for a user
+ *     description: |
+ *       Verifies the provided JWT, locates the matching user, and clears
+ *       every entry in their session token array. Useful from the password
+ *       reset email flow to force re authentication everywhere.
  *     tags: [Users]
+ *     operationId: logoutAllSessions
  *     parameters:
  *       - in: path
  *         name: token
  *         required: true
  *         schema: { type: string }
  *     responses:
- *       200: { description: Logged out from all devices }
+ *       200:
+ *         description: All sessions revoked.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //logout user from all devices
 router.post('/users/logoutAll/:token', async (req, res) => {
@@ -456,6 +590,26 @@ router.post('/users/logoutAll/:token', async (req, res) => {
 	}
 });
 
+/**
+ * @swagger
+ * /users/me:
+ *   get:
+ *     summary: Get the authenticated user profile
+ *     description: |
+ *       Returns the full user document for the bearer token holder. Sensitive
+ *       fields such as the password hash and active session tokens are
+ *       stripped by the model's `toJSON` transform before serialization.
+ *     tags: [Users]
+ *     operationId: getCurrentUser
+ *     security: [{ BearerAuth: [] }]
+ *     responses:
+ *       200:
+ *         description: User profile.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/User' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ */
 //Get current authenticated user profile
 router.get('/users/me', auth, async (req, res) => {
 	try {
@@ -469,8 +623,13 @@ router.get('/users/me', auth, async (req, res) => {
  * @swagger
  * /users/me:
  *   patch:
- *     summary: Update current user profile
+ *     summary: Update the authenticated user's profile
+ *     description: |
+ *       Partial update for the user. Only `name` and `password` are
+ *       editable; `confirmPassword` must match `password` when present.
+ *       Any other field in the body returns 400 with `invalid updates`.
  *     tags: [Users]
+ *     operationId: updateCurrentUser
  *     security: [{ BearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -480,11 +639,25 @@ router.get('/users/me', auth, async (req, res) => {
  *             type: object
  *             properties:
  *               name: { type: string }
- *               password: { type: string }
- *               confirmPassword: { type: string }
+ *               password: { type: string, minLength: 7, format: password }
+ *               confirmPassword: { type: string, format: password }
+ *             example:
+ *               name: 'Ada L.'
  *     responses:
- *       200: { description: User updated }
- *       400: { description: Validation error }
+ *       200:
+ *         description: User updated.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               minItems: 2
+ *               maxItems: 2
+ *               items:
+ *                 oneOf:
+ *                   - { $ref: '#/components/schemas/User' }
+ *                   - { $ref: '#/components/schemas/Success' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //update a user
 router.patch('/users/me', auth, escapehtml, async (req, res) => {
@@ -531,8 +704,14 @@ const upload = multer({
  * @swagger
  * /users/me/avatar:
  *   post:
- *     summary: Upload or update user avatar
+ *     summary: Upload or replace the user's avatar
+ *     description: |
+ *       Accepts a single `avatar` file (jpg, jpeg, or png) up to 1 MB. The
+ *       image is resized to 300x300, re encoded as PNG, and stored on the
+ *       user document as a base64 data URL. The response body is the data
+ *       URL string.
  *     tags: [Users]
+ *     operationId: uploadAvatar
  *     security: [{ BearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -540,13 +719,19 @@ const upload = multer({
  *         multipart/form-data:
  *           schema:
  *             type: object
+ *             required: [avatar]
  *             properties:
  *               avatar:
  *                 type: string
  *                 format: binary
  *     responses:
- *       200: { description: Avatar updated }
- *       400: { description: Invalid file type or size }
+ *       200:
+ *         description: Updated avatar data URL.
+ *         content:
+ *           text/plain:
+ *             schema: { type: string, example: 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAA...' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //Edit avatar
 router.post(

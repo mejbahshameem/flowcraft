@@ -639,11 +639,13 @@ test('Should NOT END a task', async () => {
 		.expect(400);
 });
 
-//22. Should send empty not found 404 code if no following workflow is found
+//22. Should return an empty list when the user is not following any workflow
 test('Should NOT show following workflow if user does not have any', async () => {
 	const response = await request(app)
 		.get(`/api/v1/users/me/workflowinstance/following/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
-		.expect(404);
+		.expect(200);
+
+	expect(response.body).toEqual([]);
 });

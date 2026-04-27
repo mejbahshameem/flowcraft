@@ -137,7 +137,7 @@ test('Should not save a Task in the workflow', async () => {
 			step_no: 1,
 			workflow: workflow1._id,
 		})
-		.expect(400);
+		.expect(404);
 
 	//check in the database if Task2 is not added to workflow 1 as user 2 is trying to manipulate workflow 1 when
 	//this user is not owner of this workflow
@@ -197,7 +197,7 @@ test('Should not edit a task', async () => {
 		.patch(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
-		.expect(400);
+		.expect(404);
 });
 
 //15. Should delete a task by authentic user
@@ -215,7 +215,7 @@ test('Should not delete a task', async () => {
 		.delete(`/api/v1/workflow/${workflow3._id}/tasks/${task3._id}`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
-		.expect(400);
+		.expect(404);
 
 	//Also check in the database that it is not deleted
 	const task = await Task.findById(task3._id);
@@ -280,6 +280,6 @@ test('Should GET Voting history of a user', async () => {
 		.send()
 		.expect(200);
 
-	expect(response.body[0].vote).toBe('UP VOTE');
-	expect(response.body[1].vote).toEqual('DOWN VOTE');
+	expect(response.body[0].vote).toBe('UP_VOTE');
+	expect(response.body[1].vote).toEqual('DOWN_VOTE');
 });

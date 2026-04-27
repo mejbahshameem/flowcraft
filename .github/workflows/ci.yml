@@ -91,4 +91,5 @@ jobs:
 
       - name: Smoke test image
         run: |
-          docker run --rm flowcraft-api:ci node -e "require('./src/app'); console.log('image boots ok')"
+          docker run --rm -e MONGODB_URL=mongodb://localhost:1/ci flowcraft-api:ci \
+            node -e "require('./src/app'); console.log('image boots ok')"

@@ -4,7 +4,28 @@
 
 A collaborative platform for creating, sharing, and executing step by step workflows. Users can design multi step workflow templates, share them with the community, follow workflows created by others, and track their progress through sequential task completion.
 
-**Live:** Frontend on Vercel — https://flowcraftio.vercel.app · Backend on Render — https://flowcraft-2s58.onrender.com
+## Why this exists
+
+Most "how to" advice on the internet is buried in long blog posts, YouTube videos, or fragmented forum threads. People rediscover the same ten steps for getting a driving licence in a new country, applying for a visa, training for a marathon, or launching a side project, every single time. The information is good, but the format is wrong: there is no shared structure, no validation, no progress tracking.
+
+FlowCraft turns those scattered guides into living, community vetted checklists. Anyone can publish a workflow, the crowd upvotes the ones that actually work, and followers track their own progress through real ordered steps with deadlines and reminders. The result is a single trusted place to follow a tested plan toward a real life goal, instead of stitching one together from twenty browser tabs.
+
+## Live demo
+
+| Surface | URL |
+|---------|-----|
+| Frontend (Vercel) | https://flowcraftio.vercel.app |
+| Backend (Render) | https://flowcraft-2s58.onrender.com |
+| API docs (Swagger) | https://flowcraft-2s58.onrender.com/api/docs |
+
+### Try it as a power user
+
+Skip the signup flow and log in with the seeded power user account, who already owns workflows, follows others, and has voting history:
+
+| Field | Value |
+|-------|-------|
+| Email | `user1@flowcraft.test` |
+| Password | `FlowCraft123` |
 
 ## Features
 

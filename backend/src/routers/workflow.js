@@ -16,8 +16,13 @@ const { workflowAccess } = require('../utility/enums');
  * @swagger
  * /workflow/create:
  *   post:
- *     summary: Create a new workflow
+ *     summary: Create a workflow template
+ *     description: |
+ *       Creates a new workflow owned by the authenticated user. Tasks are
+ *       added separately via `POST /workflow/tasks/create`. A workflow with
+ *       `access: PRIVATE` is hidden from search and the popular feed.
  *     tags: [Workflows]
+ *     operationId: createWorkflow
  *     security: [{ BearerAuth: [] }]
  *     requestBody:
  *       required: true
@@ -25,15 +30,25 @@ const { workflowAccess } = require('../utility/enums');
  *         application/json:
  *           schema:
  *             type: object
- *             required: [name, description, location]
+ *             required: [name, description]
  *             properties:
- *               name: { type: string }
- *               description: { type: string }
- *               location: { type: string }
- *               access: { type: string, enum: [public, private] }
+ *               name: { type: string, maxLength: 120 }
+ *               description: { type: string, maxLength: 4000 }
+ *               location: { type: string, maxLength: 160 }
+ *               access: { type: string, enum: [PUBLIC, PRIVATE], default: PUBLIC }
+ *             example:
+ *               name: Onboarding playbook
+ *               description: Step by step guide for onboarding a new engineer.
+ *               location: Berlin
+ *               access: PUBLIC
  *     responses:
- *       201: { description: Workflow created }
- *       400: { description: Validation error }
+ *       201:
+ *         description: Workflow created.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Workflow' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //Create a workflow
 router.post('/workflow/create', auth, escapehtml, async (req, res) => {
@@ -53,17 +68,25 @@ router.post('/workflow/create', auth, escapehtml, async (req, res) => {
  * @swagger
  * /workflow/{_id}/copy:
  *   post:
- *     summary: Copy another user's workflow for editing
+ *     summary: Clone an existing workflow into the caller's account
+ *     description: |
+ *       Duplicates the source workflow and all of its tasks. The copy is
+ *       owned by the caller, defaults to `PRIVATE`, and links back to the
+ *       original via `source_workflow`. Editing the copy does not affect
+ *       the source.
  *     tags: [Workflows]
+ *     operationId: copyWorkflow
  *     security: [{ BearerAuth: [] }]
  *     parameters:
- *       - in: path
- *         name: _id
- *         required: true
- *         schema: { type: string }
+ *       - $ref: '#/components/parameters/ObjectIdPath'
  *     responses:
- *       201: { description: Workflow copied }
- *       400: { description: Workflow not found }
+ *       201:
+ *         description: Cloned workflow.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Workflow' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //Copy a workflow of another user for editing
 router.post('/workflow/:_id/copy', auth, async (req, res) => {
@@ -199,16 +222,24 @@ router.patch('/workflow/:_id/edit', auth, escapehtml, async (req, res) => {
  * /workflow/{_id}/delete:
  *   delete:
  *     summary: Soft delete a workflow
+ *     description: |
+ *       Marks the workflow as deleted but keeps the document in the
+ *       database so existing followers retain their progress history. The
+ *       deleted workflow disappears from search, the popular feed, and the
+ *       owner's `created-workflows/all` listing.
  *     tags: [Workflows]
+ *     operationId: deleteWorkflow
  *     security: [{ BearerAuth: [] }]
  *     parameters:
- *       - in: path
- *         name: _id
- *         required: true
- *         schema: { type: string }
+ *       - $ref: '#/components/parameters/ObjectIdPath'
  *     responses:
- *       200: { description: Workflow deleted }
- *       400: { description: Not found }
+ *       200:
+ *         description: Workflow soft deleted.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //delete created workflow
 router.delete('/workflow/:_id/delete', auth, async (req, res) => {
@@ -257,17 +288,29 @@ router.delete('/workflow/:_id/delete', auth, async (req, res) => {
  * @swagger
  * /workflow/{_id}/follow:
  *   post:
- *     summary: Follow a workflow
+ *     summary: Follow a workflow and create a personal instance
+ *     description: |
+ *       Registers the caller as a follower of the target workflow and
+ *       creates a `WorkflowInstance` plus per task `TaskInstance` documents
+ *       so the caller can track progress independently. Calling this
+ *       endpoint twice on the same workflow returns 400.
  *     tags: [Workflows]
+ *     operationId: followWorkflow
  *     security: [{ BearerAuth: [] }]
  *     parameters:
- *       - in: path
- *         name: _id
- *         required: true
- *         schema: { type: string }
+ *       - $ref: '#/components/parameters/ObjectIdPath'
  *     responses:
- *       200: { description: Now following the workflow }
- *       400: { description: Already following or workflow deleted }
+ *       200:
+ *         description: Workflow followed and instance created.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       400:
+ *         description: Already following, or the source workflow is deleted.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Error' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //Registered user following a workflow
 router.post('/workflow/:_id/follow', auth, async (req, res) => {
@@ -343,17 +386,29 @@ router.post('/workflow/:_id/follow', auth, async (req, res) => {
  * @swagger
  * /workflow-instance/{_id}/unfollow:
  *   get:
- *     summary: Unfollow a workflow
+ *     summary: Stop following a workflow and delete the personal instance
+ *     description: |
+ *       Removes the caller from the source workflows follower list, drops
+ *       the relation entry from their `followedworkflow` array, and deletes
+ *       the corresponding `WorkflowInstance`. Progress data on that
+ *       instance is permanently lost.
  *     tags: [Workflows]
+ *     operationId: unfollowWorkflowInstance
  *     security: [{ BearerAuth: [] }]
  *     parameters:
  *       - in: path
  *         name: _id
  *         required: true
- *         schema: { type: string }
+ *         description: The personal workflow instance id, not the source workflow id.
+ *         schema: { type: string, pattern: '^[a-fA-F0-9]{24}$' }
  *     responses:
- *       200: { description: Unfollowed successfully }
- *       400: { description: Not following this workflow }
+ *       200:
+ *         description: Unfollowed.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
  */
 //Registered user unfollowing a workflow
 router.get('/workflow-instance/:_id/unfollow', auth, async (req, res) => {
@@ -408,27 +463,25 @@ router.get('/workflow-instance/:_id/unfollow', auth, async (req, res) => {
 /**
  * @swagger
  * /workflow/{_id}/vote:
- *   post:
- *     summary: Upvote or downvote a workflow
+ *   delete:
+ *     summary: Clear the caller's vote on a workflow
+ *     description: |
+ *       Removes the authenticated user from both the upvote and downvote
+ *       lists on the workflow. Idempotent: if the user has not voted, the
+ *       endpoint still returns 200.
  *     tags: [Workflows]
+ *     operationId: clearWorkflowVote
  *     security: [{ BearerAuth: [] }]
  *     parameters:
- *       - in: path
- *         name: _id
- *         required: true
- *         schema: { type: string }
- *     requestBody:
- *       required: true
- *       content:
- *         application/json:
- *           schema:
- *             type: object
- *             required: [vote]
- *             properties:
- *               vote: { type: string, enum: [up_vote, down_vote] }
+ *       - $ref: '#/components/parameters/ObjectIdPath'
  *     responses:
- *       200: { description: Vote recorded }
- *       400: { description: Already voted or invalid vote }
+ *       200:
+ *         description: Vote cleared.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/Success' }
+ *       401: { $ref: '#/components/responses/Unauthorized' }
+ *       404: { $ref: '#/components/responses/NotFound' }
  */
 //Clear the current user's vote on a workflow
 router.delete('/workflow/:_id/vote', auth, async (req, res, next) => {
@@ -583,16 +636,24 @@ router.post('/workflow/:_id/vote', auth, escapehtml, async (req, res) => {
  * @swagger
  * /workflow/{_id}/view:
  *   get:
- *     summary: View workflow details and tasks
+ *     summary: Public detail view of a workflow
+ *     description: |
+ *       Returns the workflow's display fields, its tasks, vote totals, and
+ *       a JWT signed identifier of the owner. The signed `owner` field is
+ *       what the comment endpoints expect when the caller wants to claim
+ *       ownership without having logged in. Does not require auth.
  *     tags: [Workflows]
+ *     operationId: viewWorkflow
  *     parameters:
- *       - in: path
- *         name: _id
- *         required: true
- *         schema: { type: string }
+ *       - $ref: '#/components/parameters/ObjectIdPath'
  *     responses:
- *       200: { description: Workflow details with tasks }
- *       400: { description: Workflow not found }
+ *       200:
+ *         description: Workflow detail payload.
+ *         content:
+ *           application/json:
+ *             schema: { $ref: '#/components/schemas/WorkflowDetailView' }
+ *       400: { $ref: '#/components/responses/ValidationError' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //view the workflow after clicking from search result
 router.get('/workflow/:_id/view', async (req, res) => {
@@ -630,10 +691,23 @@ router.get('/workflow/:_id/view', async (req, res) => {
  * @swagger
  * /workflows/popular:
  *   get:
- *     summary: Get top 10 popular workflows by upvotes
+ *     summary: Top 10 public workflows ranked by upvotes
+ *     description: |
+ *       Aggregates public, non deleted workflows, computes vote and
+ *       follower counts plus the task count, then returns the ten highest
+ *       ranked entries. Sorted primarily by upvotes and broken by
+ *       followers. No authentication required.
  *     tags: [Workflows]
+ *     operationId: listPopularWorkflows
  *     responses:
- *       200: { description: List of popular workflows }
+ *       200:
+ *         description: Popular workflows.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/WorkflowSummary' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //popular workflow by the #of upvotes
 router.get('/workflows/popular', async (req, res, next) => {
@@ -676,26 +750,39 @@ router.get('/workflows/popular', async (req, res, next) => {
  * @swagger
  * /search:
  *   get:
- *     summary: Search workflows by interest and location
+ *     summary: Full text search over public workflows
+ *     description: |
+ *       Runs a MongoDB `$text` search across the workflow `name` and
+ *       `location` indexes. Both `interest` and `location` query
+ *       parameters are concatenated into the search expression; passing
+ *       neither returns an empty list. Private and deleted workflows are
+ *       excluded.
  *     tags: [Workflows]
+ *     operationId: searchWorkflows
  *     parameters:
  *       - in: query
  *         name: interest
+ *         description: Free text matched against the workflow name.
  *         schema: { type: string }
  *       - in: query
  *         name: location
+ *         description: Free text matched against the workflow location.
  *         schema: { type: string }
  *       - in: query
  *         name: sortBy
- *         schema: { type: string, enum: [createdAt, up_vote] }
- *       - in: query
- *         name: limit
- *         schema: { type: integer }
- *       - in: query
- *         name: skip
- *         schema: { type: integer }
+ *         description: Secondary sort applied after relevance score.
+ *         schema: { type: string, enum: [createdAt, up_vote], default: createdAt }
+ *       - $ref: '#/components/parameters/PaginationLimit'
+ *       - $ref: '#/components/parameters/PaginationSkip'
  *     responses:
- *       200: { description: Search results }
+ *       200:
+ *         description: Matching workflows.
+ *         content:
+ *           application/json:
+ *             schema:
+ *               type: array
+ *               items: { $ref: '#/components/schemas/WorkflowSummary' }
+ *       500: { $ref: '#/components/responses/ServerError' }
  */
 //Get Search result
 router.get('/search', escapehtml, async (req, res, next) => {

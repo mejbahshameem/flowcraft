@@ -1,4 +1,4 @@
-const request = require('supertest');
+﻿const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/user');
 const { notifiableusers, notify } = require('../src/utility/cronjobs');
@@ -25,7 +25,7 @@ beforeEach(setupDatabase);
 //To run this test case please set the cron job time to current time and comment out the set timeout
 // code section and comment out jest.setTimeout(99000)
 //1. Should start cron jobs and should list the notifiable user
-test('Should make a user notifiable if deadline is 2 days away', async done => {
+test('Should make a user notifiable if deadline is 2 days away', async () => {
 	//	jest.setTimeout(50000); //please uncomment this line to run the test
 
 	// As the database is cleared before each test so first we need to follow a workflow
@@ -56,7 +56,7 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -104,7 +104,6 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 	// const notfiable_task = await TaskNotification.find({});
 	// console.log(notfiable_task);
 	// // expect(notfiable_task[0].task_name).toEqual('Task5');
-	done();
 });
 
 // To run this test case please set the cron job time to current time and comment out the set timeout
@@ -112,7 +111,7 @@ test('Should make a user notifiable if deadline is 2 days away', async done => {
 // We first need to run the cronjobs to select the notifiable user and then finally another cronjob to send
 // email to the calculated notifiable user
 //2. Should notify user about the deadline of a task
-test('Should notify user about task deadline', async done => {
+test('Should notify user about task deadline', async () => {
 	//	jest.setTimeout(80000); // please uncomment this line
 	// As the database is cleared before each test so first we need to follow a workflow
 	// Then inside the workflow we need to start a startable task
@@ -144,7 +143,7 @@ test('Should notify user about task deadline', async done => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -195,7 +194,6 @@ test('Should notify user about task deadline', async done => {
 	// const notfiable_task = await TaskNotification.find({});
 	// console.log(notfiable_task);
 	// // expect(notfiable_task[0].task_name).toEqual('Task5');
-	done();
 });
 
 //3. Should Post a PUBLIC comment if the user is authenticated and to the public workflow view page
@@ -244,7 +242,7 @@ test('Should NOT post a Private comment in Public Workflow View', async () => {
 			comment: 'Trying to post a PRIVATE comment..Should be stopped',
 			comment_type: 'PRIVATE',
 		})
-		.expect(400);
+		.expect(403);
 	// expect(response.body.comment).toEqual('this is a public comment');
 
 	//Also check in the db
@@ -332,7 +330,7 @@ test('Should NOT allow a PUBLIC comment in worfklow instance', async () => {
 			comment: 'PUBLIC comment should not be allowed',
 			comment_type: 'PUBLIC',
 		})
-		.expect(400);
+		.expect(403);
 
 	//Also check in the db of DISAPPROVAL
 	wf_instance = await WorkFlowInstance.findOne({
@@ -373,7 +371,7 @@ test('Should NOT allow Private comment other than the owner', async () => {
 			comment: 'I am not the owner',
 			comment_type: 'PRIVATE',
 		})
-		.expect(400);
+		.expect(403);
 
 	wf_instance = await WorkFlowInstance.findOne({
 		owner: userOne_id,
@@ -413,8 +411,9 @@ test('Should not show all tasks under a workflow to the user who is not owner', 
 		.send()
 		.expect(200);
 	expect(response.body.length).toBe(2);
-	expect(response.body[0].commenter._id).toBe(usertwo_id.toString());
-	expect(response.body[1].commenter._id).toBe(userOne_id.toString());
+	// Comments are returned newest first. userOne posted second, so it lands at index 0.
+	expect(response.body[0].commenter._id).toBe(userOne_id.toString());
+	expect(response.body[1].commenter._id).toBe(usertwo_id.toString());
 });
 
 //MOON 10. Should NOT Get PUBLIC comments of a workflow if Query Parameter is set to PRIVATE
@@ -447,7 +446,7 @@ test('Should NOT Fetch Comments', async () => {
 	response = await request(app)
 		.get(`/api/v1/workflow/${workflow4._id}/comments/${'PRIVATE'}/all`)
 		.send()
-		.expect(400);
+		.expect(403);
 });
 
 //MOON 11. Should Get ALL PRIVATE comments of a workflow instance that user is following
@@ -504,8 +503,9 @@ test('Should GET all PRIVATE comments of a workflow instance', async () => {
 	expect(response.body.length).toBe(2);
 	expect(response.body[0].commenter._id).toBe(userOne_id.toString());
 	expect(response.body[1].commenter._id).toBe(userOne_id.toString());
-	expect(response.body[0].comment).toBe('First Private Comment');
-	expect(response.body[1].comment).toBe('Second Private Comment');
+	// Comments are returned newest first, so the second post lands at index 0.
+	expect(response.body[0].comment).toBe('Second Private Comment');
+	expect(response.body[1].comment).toBe('First Private Comment');
 });
 
 //MOON 12. Should NOT FETCH PRIVATE comments of another user other than the Owner of the instance
@@ -559,7 +559,7 @@ test('Should NOT Fetch PRIVATE comments of another user', async () => {
 			}`
 		)
 		.send()
-		.expect(400);
+		.expect(403);
 });
 
 //MOON 13. Should NOT Work Fetching PUBLIC comment for an instance as instance has only PRIVATE Comments
@@ -613,5 +613,5 @@ test('Should NOT work PUBLIC comment Fetching for a workflow instance', async ()
 			}`
 		)
 		.send()
-		.expect(400);
+		.expect(403);
 });

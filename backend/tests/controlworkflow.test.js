@@ -1,4 +1,4 @@
-const request = require('supertest');
+﻿const request = require('supertest');
 const app = require('../src/app');
 const User = require('../src/models/user');
 const mongoose = require('mongoose');
@@ -327,7 +327,7 @@ test('Should get all tasks instance inside a workflow instances', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(response.body.length - 1).toBe(workflow4.tasks.length);
+	expect(response.body.length).toBe(workflow4.tasks.length);
 	//We have to do this 'response.body.length - 1' because of one extra property
 	// which is timestamps
 });
@@ -359,7 +359,7 @@ test('Should START a task', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -367,7 +367,7 @@ test('Should START a task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -409,7 +409,7 @@ test('Should END a started task', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -417,7 +417,7 @@ test('Should END a started task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -431,7 +431,7 @@ test('Should END a started task', async () => {
 
 	//Now we can also End this task as it is in progress.
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/end`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/end`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -506,7 +506,7 @@ test('Should set Task Deadline notification', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -514,7 +514,7 @@ test('Should set Task Deadline notification', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -527,7 +527,7 @@ test('Should set Task Deadline notification', async () => {
 	expect(task.status).toEqual(taskStatus.IN_PROGRESS);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/notify`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/notify`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send({
@@ -563,7 +563,7 @@ test('Should NOT START a task which is not startable', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are NOT in step 1 of the workflow should NOT be able to be started
 	// let's try to start a task which is not in step_no 1
@@ -571,7 +571,7 @@ test('Should NOT START a task which is not startable', async () => {
 	const index_second_step = tasks.body.findIndex(task => task.step_no === 2);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -607,7 +607,7 @@ test('Should NOT END a task', async () => {
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(200);
-	expect(tasks.body.length - 1).toBe(workflow4.tasks.length);
+	expect(tasks.body.length).toBe(workflow4.tasks.length);
 
 	// Now all of the tasks which are in step 1 of the workflow should be able to be started
 	// let's start the first task in the task array..To be started it must be in step 1
@@ -615,7 +615,7 @@ test('Should NOT END a task', async () => {
 	const index_first_step = tasks.body.findIndex(task => task.step_no === 1);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_first_step]._id}/start`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
@@ -632,18 +632,20 @@ test('Should NOT END a task', async () => {
 	const index_second_step = tasks.body.findIndex(task => task.step_no === 2);
 
 	response = await request(app)
-		.post(``/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/end`
+		.post(`/api/v1/following/workflow/${wf_instance._id}/task/${tasks.body[index_second_step]._id}/end`
 		)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
 		.expect(400);
 });
 
-//22. Should send empty not found 404 code if no following workflow is found
+//22. Should return an empty list when the user is not following any workflow
 test('Should NOT show following workflow if user does not have any', async () => {
 	const response = await request(app)
 		.get(`/api/v1/users/me/workflowinstance/following/all`)
 		.set('Authorization', `Bearer ${userOne.tokens[0].token}`)
 		.send()
-		.expect(404);
+		.expect(200);
+
+	expect(response.body).toEqual([]);
 });

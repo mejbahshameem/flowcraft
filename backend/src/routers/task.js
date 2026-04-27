@@ -233,7 +233,12 @@ router.patch(
 		const { wfid, tkid } = req.params;
 
 		const allowedUpdates = ['name', 'description', 'days_required', 'step_no'];
-		const updates = Object.keys(req.body).filter(k => allowedUpdates.includes(k));
+		const updates = Object.keys(req.body);
+		const isValidOperation = updates.every(k => allowedUpdates.includes(k));
+
+		if (!isValidOperation) {
+			return res.status(400).json({ error: 'invalid updates!' });
+		}
 
 		try {
 			const wf = await WorkFlow.findOne({

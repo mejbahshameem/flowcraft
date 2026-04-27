@@ -53,9 +53,40 @@ src/
 | Central Error Handler | Consistent JSON error responses, no stack traces in production |
 | Input Sanitization | HTML entity encoding on user submitted content |
 
+## API Documentation
+
+The full OpenAPI 3.0.3 specification is generated at runtime from the JSDoc `@swagger` blocks in [`src/routers/*.js`](src/routers/) and the reusable components defined in [`src/config/swagger.js`](src/config/swagger.js).
+
+**Interactive Swagger UI:**
+
+| Environment | URL |
+|-------------|-----|
+| Local | http://localhost:3000/api/docs |
+| Production | https://flowcraft-2s58.onrender.com/api/docs |
+
+The same spec is exposed as JSON at `/api/docs.json` if your client needs to consume it directly.
+
+**Reusable components defined in the spec**
+
+* **Schemas:** `User`, `LoginResponse`, `Workflow`, `WorkflowInstance`, `Task`, `TaskInstance`, `WorkflowSummary`, `FollowedWorkflowSummary`, `CreatedWorkflowSummary`, `WorkflowDetailView`, `WorkflowTasksList`, `VotingHistoryEntry`, `Comment`, `MatchResponse`, `HealthResponse`, `Success`, `Error`, `NotActivatedError`, `ObjectId`.
+* **Parameters:** `ObjectIdPath`, `PaginationLimit`, `PaginationSkip`.
+* **Responses:** `Unauthorized`, `Forbidden`, `NotFound`, `ValidationError`, `RateLimited`, `ServerError`.
+* **Security scheme:** `BearerAuth` (HTTP Bearer JWT).
+
+**Tagged groups**
+
+| Tag | Coverage |
+|-----|----------|
+| Users | Registration, authentication, profile management, account lifecycle, and password recovery. |
+| Workflows | Workflow templates: create, edit, delete, copy, follow, vote, search, and view. |
+| Tasks | Tasks within a workflow template that the owner adds and edits. |
+| User Workflows | A users own followed workflow instances and the per task progress tracking. |
+| Comments | Public comments on workflow templates and private notes on personal workflow instances. |
+| System | Service health and operational endpoints. |
+
 ## API Endpoints
 
-All routes are prefixed with `/api/v1`. Full interactive documentation available at `/api/docs`.
+All routes are prefixed with `/api/v1` (the health probe at `/health` is the only exception).
 
 ### Users
 

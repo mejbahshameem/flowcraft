@@ -15,7 +15,6 @@ FlowCraft turns those scattered guides into living, community vetted checklists.
 | Surface | URL |
 |---------|-----|
 | Frontend (Vercel) | https://flowcraftio.vercel.app |
-| Backend (Render) | https://flowcraft-2s58.onrender.com |
 | API docs (Swagger) | https://flowcraft-2s58.onrender.com/api/docs |
 
 ### Try it as a power user
